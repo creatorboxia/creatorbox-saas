@@ -10,33 +10,184 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedClientesClienteIdRouteRouteImport } from './routes/_authenticated/clientes/$clienteId/route'
+import { Route as AuthenticatedClientesNovoRouteImport } from './routes/_authenticated/clientes/novo'
+import { Route as AuthenticatedClientesClienteIdIndexRouteImport } from './routes/_authenticated/clientes/$clienteId/index'
+import { Route as AuthenticatedClientesClienteIdCalendarioRouteImport } from './routes/_authenticated/clientes/$clienteId/calendario'
+import { Route as AuthenticatedClientesClienteIdConteudosRouteImport } from './routes/_authenticated/clientes/$clienteId/conteudos'
+import { Route as AuthenticatedClientesClienteIdEstrategiaRouteImport } from './routes/_authenticated/clientes/$clienteId/estrategia'
+import { Route as AuthenticatedClientesClienteIdInformacoesRouteImport } from './routes/_authenticated/clientes/$clienteId/informacoes'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedChatRoute = AuthenticatedChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedClientesClienteIdRouteRoute =
+  AuthenticatedClientesClienteIdRouteRouteImport.update({
+    id: '/clientes/$clienteId',
+    path: '/clientes/$clienteId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedClientesNovoRoute =
+  AuthenticatedClientesNovoRouteImport.update({
+    id: '/clientes/novo',
+    path: '/clientes/novo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedClientesClienteIdIndexRoute =
+  AuthenticatedClientesClienteIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedClientesClienteIdRouteRoute,
+  } as any)
+const AuthenticatedClientesClienteIdCalendarioRoute =
+  AuthenticatedClientesClienteIdCalendarioRouteImport.update({
+    id: '/calendario',
+    path: '/calendario',
+    getParentRoute: () => AuthenticatedClientesClienteIdRouteRoute,
+  } as any)
+const AuthenticatedClientesClienteIdConteudosRoute =
+  AuthenticatedClientesClienteIdConteudosRouteImport.update({
+    id: '/conteudos',
+    path: '/conteudos',
+    getParentRoute: () => AuthenticatedClientesClienteIdRouteRoute,
+  } as any)
+const AuthenticatedClientesClienteIdEstrategiaRoute =
+  AuthenticatedClientesClienteIdEstrategiaRouteImport.update({
+    id: '/estrategia',
+    path: '/estrategia',
+    getParentRoute: () => AuthenticatedClientesClienteIdRouteRoute,
+  } as any)
+const AuthenticatedClientesClienteIdInformacoesRoute =
+  AuthenticatedClientesClienteIdInformacoesRouteImport.update({
+    id: '/informacoes',
+    path: '/informacoes',
+    getParentRoute: () => AuthenticatedClientesClienteIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/chat': typeof AuthenticatedChatRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
+  '/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
+  '/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
+  '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
+  '/clientes/$clienteId/informacoes': typeof AuthenticatedClientesClienteIdInformacoesRoute
+  '/clientes/$clienteId/': typeof AuthenticatedClientesClienteIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/chat': typeof AuthenticatedChatRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
+  '/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
+  '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
+  '/clientes/$clienteId/informacoes': typeof AuthenticatedClientesClienteIdInformacoesRoute
+  '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/chat': typeof AuthenticatedChatRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
+  '/_authenticated/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/_authenticated/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
+  '/_authenticated/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
+  '/_authenticated/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
+  '/_authenticated/clientes/$clienteId/informacoes': typeof AuthenticatedClientesClienteIdInformacoesRoute
+  '/_authenticated/clientes/$clienteId/': typeof AuthenticatedClientesClienteIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/chat'
+    | '/dashboard'
+    | '/clientes/$clienteId'
+    | '/clientes/novo'
+    | '/clientes/$clienteId/calendario'
+    | '/clientes/$clienteId/conteudos'
+    | '/clientes/$clienteId/estrategia'
+    | '/clientes/$clienteId/informacoes'
+    | '/clientes/$clienteId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/chat'
+    | '/dashboard'
+    | '/clientes/novo'
+    | '/clientes/$clienteId/calendario'
+    | '/clientes/$clienteId/conteudos'
+    | '/clientes/$clienteId/estrategia'
+    | '/clientes/$clienteId/informacoes'
+    | '/clientes/$clienteId'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/reset-password'
+    | '/_authenticated/chat'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/clientes/$clienteId'
+    | '/_authenticated/clientes/novo'
+    | '/_authenticated/clientes/$clienteId/calendario'
+    | '/_authenticated/clientes/$clienteId/conteudos'
+    | '/_authenticated/clientes/$clienteId/estrategia'
+    | '/_authenticated/clientes/$clienteId/informacoes'
+    | '/_authenticated/clientes/$clienteId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +199,143 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/chat': {
+      id: '/_authenticated/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof AuthenticatedChatRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/clientes/$clienteId': {
+      id: '/_authenticated/clientes/$clienteId'
+      path: '/clientes/$clienteId'
+      fullPath: '/clientes/$clienteId'
+      preLoaderRoute: typeof AuthenticatedClientesClienteIdRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/clientes/novo': {
+      id: '/_authenticated/clientes/novo'
+      path: '/clientes/novo'
+      fullPath: '/clientes/novo'
+      preLoaderRoute: typeof AuthenticatedClientesNovoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/clientes/$clienteId/': {
+      id: '/_authenticated/clientes/$clienteId/'
+      path: '/'
+      fullPath: '/clientes/$clienteId/'
+      preLoaderRoute: typeof AuthenticatedClientesClienteIdIndexRouteImport
+      parentRoute: typeof AuthenticatedClientesClienteIdRouteRoute
+    }
+    '/_authenticated/clientes/$clienteId/calendario': {
+      id: '/_authenticated/clientes/$clienteId/calendario'
+      path: '/calendario'
+      fullPath: '/clientes/$clienteId/calendario'
+      preLoaderRoute: typeof AuthenticatedClientesClienteIdCalendarioRouteImport
+      parentRoute: typeof AuthenticatedClientesClienteIdRouteRoute
+    }
+    '/_authenticated/clientes/$clienteId/conteudos': {
+      id: '/_authenticated/clientes/$clienteId/conteudos'
+      path: '/conteudos'
+      fullPath: '/clientes/$clienteId/conteudos'
+      preLoaderRoute: typeof AuthenticatedClientesClienteIdConteudosRouteImport
+      parentRoute: typeof AuthenticatedClientesClienteIdRouteRoute
+    }
+    '/_authenticated/clientes/$clienteId/estrategia': {
+      id: '/_authenticated/clientes/$clienteId/estrategia'
+      path: '/estrategia'
+      fullPath: '/clientes/$clienteId/estrategia'
+      preLoaderRoute: typeof AuthenticatedClientesClienteIdEstrategiaRouteImport
+      parentRoute: typeof AuthenticatedClientesClienteIdRouteRoute
+    }
+    '/_authenticated/clientes/$clienteId/informacoes': {
+      id: '/_authenticated/clientes/$clienteId/informacoes'
+      path: '/informacoes'
+      fullPath: '/clientes/$clienteId/informacoes'
+      preLoaderRoute: typeof AuthenticatedClientesClienteIdInformacoesRouteImport
+      parentRoute: typeof AuthenticatedClientesClienteIdRouteRoute
+    }
   }
 }
 
+interface AuthenticatedClientesClienteIdRouteRouteChildren {
+  AuthenticatedClientesClienteIdCalendarioRoute: typeof AuthenticatedClientesClienteIdCalendarioRoute
+  AuthenticatedClientesClienteIdConteudosRoute: typeof AuthenticatedClientesClienteIdConteudosRoute
+  AuthenticatedClientesClienteIdEstrategiaRoute: typeof AuthenticatedClientesClienteIdEstrategiaRoute
+  AuthenticatedClientesClienteIdInformacoesRoute: typeof AuthenticatedClientesClienteIdInformacoesRoute
+  AuthenticatedClientesClienteIdIndexRoute: typeof AuthenticatedClientesClienteIdIndexRoute
+}
+
+const AuthenticatedClientesClienteIdRouteRouteChildren: AuthenticatedClientesClienteIdRouteRouteChildren =
+  {
+    AuthenticatedClientesClienteIdCalendarioRoute:
+      AuthenticatedClientesClienteIdCalendarioRoute,
+    AuthenticatedClientesClienteIdConteudosRoute:
+      AuthenticatedClientesClienteIdConteudosRoute,
+    AuthenticatedClientesClienteIdEstrategiaRoute:
+      AuthenticatedClientesClienteIdEstrategiaRoute,
+    AuthenticatedClientesClienteIdInformacoesRoute:
+      AuthenticatedClientesClienteIdInformacoesRoute,
+    AuthenticatedClientesClienteIdIndexRoute:
+      AuthenticatedClientesClienteIdIndexRoute,
+  }
+
+const AuthenticatedClientesClienteIdRouteRouteWithChildren =
+  AuthenticatedClientesClienteIdRouteRoute._addFileChildren(
+    AuthenticatedClientesClienteIdRouteRouteChildren,
+  )
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedChatRoute: typeof AuthenticatedChatRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedClientesClienteIdRouteRoute: typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
+  AuthenticatedClientesNovoRoute: typeof AuthenticatedClientesNovoRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedChatRoute: AuthenticatedChatRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedClientesClienteIdRouteRoute:
+    AuthenticatedClientesClienteIdRouteRouteWithChildren,
+  AuthenticatedClientesNovoRoute: AuthenticatedClientesNovoRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
