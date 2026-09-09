@@ -19,6 +19,7 @@ import { Route as AuthenticatedClientesClienteIdRouteRouteImport } from './route
 import { Route as AuthenticatedClientesNovoRouteImport } from './routes/_authenticated/clientes/novo'
 import { Route as AuthenticatedClientesClienteIdIndexRouteImport } from './routes/_authenticated/clientes/$clienteId/index'
 import { Route as AuthenticatedClientesClienteIdCalendarioRouteImport } from './routes/_authenticated/clientes/$clienteId/calendario'
+import { Route as AuthenticatedClientesClienteIdConteudosRouteImport } from './routes/_authenticated/clientes/$clienteId/conteudos'
 import { Route as AuthenticatedClientesClienteIdEstrategiaRouteImport } from './routes/_authenticated/clientes/$clienteId/estrategia'
 
 const IndexRoute = IndexRouteImport.update({
@@ -74,6 +75,12 @@ const AuthenticatedClientesClienteIdCalendarioRoute =
     path: '/calendario',
     getParentRoute: () => AuthenticatedClientesClienteIdRouteRoute,
   } as any)
+const AuthenticatedClientesClienteIdConteudosRoute =
+  AuthenticatedClientesClienteIdConteudosRouteImport.update({
+    id: '/conteudos',
+    path: '/conteudos',
+    getParentRoute: () => AuthenticatedClientesClienteIdRouteRoute,
+  } as any)
 const AuthenticatedClientesClienteIdEstrategiaRoute =
   AuthenticatedClientesClienteIdEstrategiaRouteImport.update({
     id: '/estrategia',
@@ -90,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
   '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
+  '/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
   '/clientes/$clienteId/': typeof AuthenticatedClientesClienteIdIndexRoute
 }
@@ -101,6 +109,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
   '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
+  '/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
   '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdIndexRoute
 }
@@ -115,6 +124,7 @@ export interface FileRoutesById {
   '/_authenticated/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
   '/_authenticated/clientes/novo': typeof AuthenticatedClientesNovoRoute
   '/_authenticated/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
+  '/_authenticated/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/_authenticated/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
   '/_authenticated/clientes/$clienteId/': typeof AuthenticatedClientesClienteIdIndexRoute
 }
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/clientes/$clienteId'
     | '/clientes/novo'
     | '/clientes/$clienteId/calendario'
+    | '/clientes/$clienteId/conteudos'
     | '/clientes/$clienteId/estrategia'
     | '/clientes/$clienteId/'
   fileRoutesByTo: FileRoutesByTo
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/clientes/novo'
     | '/clientes/$clienteId/calendario'
+    | '/clientes/$clienteId/conteudos'
     | '/clientes/$clienteId/estrategia'
     | '/clientes/$clienteId'
   id:
@@ -153,6 +165,7 @@ export interface FileRouteTypes {
     | '/_authenticated/clientes/$clienteId'
     | '/_authenticated/clientes/novo'
     | '/_authenticated/clientes/$clienteId/calendario'
+    | '/_authenticated/clientes/$clienteId/conteudos'
     | '/_authenticated/clientes/$clienteId/estrategia'
     | '/_authenticated/clientes/$clienteId/'
   fileRoutesById: FileRoutesById
@@ -236,6 +249,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesClienteIdCalendarioRouteImport
       parentRoute: typeof AuthenticatedClientesClienteIdRouteRoute
     }
+    '/_authenticated/clientes/$clienteId/conteudos': {
+      id: '/_authenticated/clientes/$clienteId/conteudos'
+      path: '/conteudos'
+      fullPath: '/clientes/$clienteId/conteudos'
+      preLoaderRoute: typeof AuthenticatedClientesClienteIdConteudosRouteImport
+      parentRoute: typeof AuthenticatedClientesClienteIdRouteRoute
+    }
     '/_authenticated/clientes/$clienteId/estrategia': {
       id: '/_authenticated/clientes/$clienteId/estrategia'
       path: '/estrategia'
@@ -248,6 +268,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedClientesClienteIdRouteRouteChildren {
   AuthenticatedClientesClienteIdCalendarioRoute: typeof AuthenticatedClientesClienteIdCalendarioRoute
+  AuthenticatedClientesClienteIdConteudosRoute: typeof AuthenticatedClientesClienteIdConteudosRoute
   AuthenticatedClientesClienteIdEstrategiaRoute: typeof AuthenticatedClientesClienteIdEstrategiaRoute
   AuthenticatedClientesClienteIdIndexRoute: typeof AuthenticatedClientesClienteIdIndexRoute
 }
@@ -256,6 +277,8 @@ const AuthenticatedClientesClienteIdRouteRouteChildren: AuthenticatedClientesCli
   {
     AuthenticatedClientesClienteIdCalendarioRoute:
       AuthenticatedClientesClienteIdCalendarioRoute,
+    AuthenticatedClientesClienteIdConteudosRoute:
+      AuthenticatedClientesClienteIdConteudosRoute,
     AuthenticatedClientesClienteIdEstrategiaRoute:
       AuthenticatedClientesClienteIdEstrategiaRoute,
     AuthenticatedClientesClienteIdIndexRoute:
