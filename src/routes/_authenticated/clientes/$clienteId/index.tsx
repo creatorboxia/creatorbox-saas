@@ -67,8 +67,8 @@ function Bloco({
   largo,
 }: {
   titulo: string;
-  texto?: string | null;
-  largo?: boolean;
+  texto?: string | null | undefined;
+  largo?: boolean | undefined;
 }) {
   return (
     <div

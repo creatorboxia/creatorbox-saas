@@ -17,6 +17,7 @@ import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedClientesClienteIdRouteRouteImport } from './routes/_authenticated/clientes/$clienteId/route'
 import { Route as AuthenticatedClientesNovoRouteImport } from './routes/_authenticated/clientes/novo'
+import { Route as AuthenticatedClientesClienteIdIndexRouteImport } from './routes/_authenticated/clientes/$clienteId/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -59,6 +60,12 @@ const AuthenticatedClientesNovoRoute =
     path: '/clientes/novo',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedClientesClienteIdIndexRoute =
+  AuthenticatedClientesClienteIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedClientesClienteIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -66,8 +73,9 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/chat': typeof AuthenticatedChatRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRoute
+  '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/clientes/$clienteId/': typeof AuthenticatedClientesClienteIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -75,8 +83,8 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/chat': typeof AuthenticatedChatRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRoute
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -86,8 +94,9 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRoute
+  '/_authenticated/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
   '/_authenticated/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/_authenticated/clientes/$clienteId/': typeof AuthenticatedClientesClienteIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/clientes/$clienteId'
     | '/clientes/novo'
+    | '/clientes/$clienteId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -106,8 +116,8 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/chat'
     | '/dashboard'
-    | '/clientes/$clienteId'
     | '/clientes/novo'
+    | '/clientes/$clienteId'
   id:
     | '__root__'
     | '/'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/clientes/$clienteId'
     | '/_authenticated/clientes/novo'
+    | '/_authenticated/clientes/$clienteId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -185,13 +196,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesNovoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/clientes/$clienteId/': {
+      id: '/_authenticated/clientes/$clienteId/'
+      path: '/'
+      fullPath: '/clientes/$clienteId/'
+      preLoaderRoute: typeof AuthenticatedClientesClienteIdIndexRouteImport
+      parentRoute: typeof AuthenticatedClientesClienteIdRouteRoute
+    }
   }
 }
+
+interface AuthenticatedClientesClienteIdRouteRouteChildren {
+  AuthenticatedClientesClienteIdIndexRoute: typeof AuthenticatedClientesClienteIdIndexRoute
+}
+
+const AuthenticatedClientesClienteIdRouteRouteChildren: AuthenticatedClientesClienteIdRouteRouteChildren =
+  {
+    AuthenticatedClientesClienteIdIndexRoute:
+      AuthenticatedClientesClienteIdIndexRoute,
+  }
+
+const AuthenticatedClientesClienteIdRouteRouteWithChildren =
+  AuthenticatedClientesClienteIdRouteRoute._addFileChildren(
+    AuthenticatedClientesClienteIdRouteRouteChildren,
+  )
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedClientesClienteIdRouteRoute: typeof AuthenticatedClientesClienteIdRouteRoute
+  AuthenticatedClientesClienteIdRouteRoute: typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
   AuthenticatedClientesNovoRoute: typeof AuthenticatedClientesNovoRoute
 }
 
@@ -199,7 +232,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedChatRoute: AuthenticatedChatRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedClientesClienteIdRouteRoute:
-    AuthenticatedClientesClienteIdRouteRoute,
+    AuthenticatedClientesClienteIdRouteRouteWithChildren,
   AuthenticatedClientesNovoRoute: AuthenticatedClientesNovoRoute,
 }
 
