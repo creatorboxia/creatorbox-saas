@@ -64,7 +64,7 @@ function Chat() {
     mutationFn: () => createConversa({ data: {} }),
     onSuccess: async (conversa) => {
       await queryClient.invalidateQueries({ queryKey: ["conversas"] });
-      setConversaId(conversa.id);
+      if (conversa) setConversaId(conversa.id);
     },
     onError: (error: Error) => toast.error("Não foi possível criar a conversa", {
       description: error.message,
@@ -73,10 +73,11 @@ function Chat() {
 
   const enviar = useMutation({
     mutationFn: async (conteudo: string) => {
-      let id = conversaId;
+      let id: string | null = conversaId;
       if (!id) {
         const conversa = await createConversa({ data: {} });
-        id = conversa.id;
+        id = conversa?.id ?? null;
+        if (!id) throw new Error("Não foi possível iniciar a conversa");
         setConversaId(id);
         await queryClient.invalidateQueries({ queryKey: ["conversas"] });
       }
