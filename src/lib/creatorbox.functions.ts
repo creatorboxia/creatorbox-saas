@@ -2,6 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
+
+export type Cliente = Database["public"]["Tables"]["clientes"]["Row"];
+export type Conteudo = Database["public"]["Tables"]["conteudos"]["Row"];
 
 const texto = () => z.string().nullable().default(null);
 
@@ -63,7 +67,7 @@ export const getPerfil = createServerFn({ method: "GET" })
 
 export const listClientes = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) =>
+  .handler(async ({ context }): Promise<Cliente[]> =>
     unwrap(
       await context.supabase
         .from("clientes")
@@ -75,7 +79,7 @@ export const listClientes = createServerFn({ method: "GET" })
 export const getCliente = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
-  .handler(async ({ data, context }) =>
+  .handler(async ({ data, context }): Promise<Cliente | null> =>
     unwrap(await context.supabase.from("clientes").select("*").eq("id", data.id).maybeSingle()),
   );
 
@@ -120,7 +124,7 @@ export const listConteudos = createServerFn({ method: "GET" })
   .inputValidator((data: { clienteId?: string | null }) =>
     z.object({ clienteId: z.string().uuid().nullable().optional() }).parse(data),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<Conteudo[]> => {
     let query = context.supabase
       .from("conteudos")
       .select("*")
