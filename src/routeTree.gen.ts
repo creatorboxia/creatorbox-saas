@@ -21,6 +21,7 @@ import { Route as AuthenticatedClientesClienteIdIndexRouteImport } from './route
 import { Route as AuthenticatedClientesClienteIdCalendarioRouteImport } from './routes/_authenticated/clientes/$clienteId/calendario'
 import { Route as AuthenticatedClientesClienteIdConteudosRouteImport } from './routes/_authenticated/clientes/$clienteId/conteudos'
 import { Route as AuthenticatedClientesClienteIdEstrategiaRouteImport } from './routes/_authenticated/clientes/$clienteId/estrategia'
+import { Route as AuthenticatedClientesClienteIdInformacoesRouteImport } from './routes/_authenticated/clientes/$clienteId/informacoes'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -87,6 +88,12 @@ const AuthenticatedClientesClienteIdEstrategiaRoute =
     path: '/estrategia',
     getParentRoute: () => AuthenticatedClientesClienteIdRouteRoute,
   } as any)
+const AuthenticatedClientesClienteIdInformacoesRoute =
+  AuthenticatedClientesClienteIdInformacoesRouteImport.update({
+    id: '/informacoes',
+    path: '/informacoes',
+    getParentRoute: () => AuthenticatedClientesClienteIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
+  '/clientes/$clienteId/informacoes': typeof AuthenticatedClientesClienteIdInformacoesRoute
   '/clientes/$clienteId/': typeof AuthenticatedClientesClienteIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -111,6 +119,7 @@ export interface FileRoutesByTo {
   '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
+  '/clientes/$clienteId/informacoes': typeof AuthenticatedClientesClienteIdInformacoesRoute
   '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdIndexRoute
 }
 export interface FileRoutesById {
@@ -126,6 +135,7 @@ export interface FileRoutesById {
   '/_authenticated/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/_authenticated/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/_authenticated/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
+  '/_authenticated/clientes/$clienteId/informacoes': typeof AuthenticatedClientesClienteIdInformacoesRoute
   '/_authenticated/clientes/$clienteId/': typeof AuthenticatedClientesClienteIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/clientes/$clienteId/calendario'
     | '/clientes/$clienteId/conteudos'
     | '/clientes/$clienteId/estrategia'
+    | '/clientes/$clienteId/informacoes'
     | '/clientes/$clienteId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/clientes/$clienteId/calendario'
     | '/clientes/$clienteId/conteudos'
     | '/clientes/$clienteId/estrategia'
+    | '/clientes/$clienteId/informacoes'
     | '/clientes/$clienteId'
   id:
     | '__root__'
@@ -167,6 +179,7 @@ export interface FileRouteTypes {
     | '/_authenticated/clientes/$clienteId/calendario'
     | '/_authenticated/clientes/$clienteId/conteudos'
     | '/_authenticated/clientes/$clienteId/estrategia'
+    | '/_authenticated/clientes/$clienteId/informacoes'
     | '/_authenticated/clientes/$clienteId/'
   fileRoutesById: FileRoutesById
 }
@@ -263,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesClienteIdEstrategiaRouteImport
       parentRoute: typeof AuthenticatedClientesClienteIdRouteRoute
     }
+    '/_authenticated/clientes/$clienteId/informacoes': {
+      id: '/_authenticated/clientes/$clienteId/informacoes'
+      path: '/informacoes'
+      fullPath: '/clientes/$clienteId/informacoes'
+      preLoaderRoute: typeof AuthenticatedClientesClienteIdInformacoesRouteImport
+      parentRoute: typeof AuthenticatedClientesClienteIdRouteRoute
+    }
   }
 }
 
@@ -270,6 +290,7 @@ interface AuthenticatedClientesClienteIdRouteRouteChildren {
   AuthenticatedClientesClienteIdCalendarioRoute: typeof AuthenticatedClientesClienteIdCalendarioRoute
   AuthenticatedClientesClienteIdConteudosRoute: typeof AuthenticatedClientesClienteIdConteudosRoute
   AuthenticatedClientesClienteIdEstrategiaRoute: typeof AuthenticatedClientesClienteIdEstrategiaRoute
+  AuthenticatedClientesClienteIdInformacoesRoute: typeof AuthenticatedClientesClienteIdInformacoesRoute
   AuthenticatedClientesClienteIdIndexRoute: typeof AuthenticatedClientesClienteIdIndexRoute
 }
 
@@ -281,6 +302,8 @@ const AuthenticatedClientesClienteIdRouteRouteChildren: AuthenticatedClientesCli
       AuthenticatedClientesClienteIdConteudosRoute,
     AuthenticatedClientesClienteIdEstrategiaRoute:
       AuthenticatedClientesClienteIdEstrategiaRoute,
+    AuthenticatedClientesClienteIdInformacoesRoute:
+      AuthenticatedClientesClienteIdInformacoesRoute,
     AuthenticatedClientesClienteIdIndexRoute:
       AuthenticatedClientesClienteIdIndexRoute,
   }

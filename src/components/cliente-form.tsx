@@ -47,11 +47,13 @@ const vazio: ClienteFormValues = {
   ativo: true,
 };
 
-export function toFormValues(cliente?: Partial<ClienteFormValues> | null): ClienteFormValues {
+export function toFormValues(
+  cliente?: Record<string, unknown> | null | undefined,
+): ClienteFormValues {
   if (!cliente) return { ...vazio };
   const merged = { ...vazio };
   for (const key of Object.keys(vazio) as (keyof ClienteFormValues)[]) {
-    const value = cliente[key];
+    const value = cliente[key as string];
     if (key === "ativo") {
       merged.ativo = value === undefined || value === null ? true : Boolean(value);
     } else if (typeof value === "string") {
