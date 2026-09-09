@@ -3,42 +3,42 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const clienteFields = {
-  nome: z.string().min(1, "Informe o nome do cliente"),
-  nicho: z.string().nullable().optional(),
-  instagram: z.string().nullable().optional(),
-  cidade: z.string().nullable().optional(),
-  servico_produto: z.string().nullable().optional(),
-  publico_alvo: z.string().nullable().optional(),
-  faixa_etaria: z.string().nullable().optional(),
-  perfil_consumidor: z.string().nullable().optional(),
-  dores: z.string().nullable().optional(),
-  desejos: z.string().nullable().optional(),
-  necessidades: z.string().nullable().optional(),
-  objetivo_cliente: z.string().nullable().optional(),
-  objetivo_redes_sociais: z.string().nullable().optional(),
-  posicionamento: z.string().nullable().optional(),
-  diferenciais: z.string().nullable().optional(),
-  tom_comunicacao: z.string().nullable().optional(),
-  ativo: z.boolean().optional(),
-};
+const texto = () => z.string().nullable().default(null);
 
-const clienteSchema = z.object(clienteFields);
-export type ClienteInput = z.infer<typeof clienteSchema>;
+const clienteSchema = z.object({
+  nome: z.string().min(1, "Informe o nome do cliente"),
+  nicho: texto(),
+  instagram: texto(),
+  cidade: texto(),
+  servico_produto: texto(),
+  publico_alvo: texto(),
+  faixa_etaria: texto(),
+  perfil_consumidor: texto(),
+  dores: texto(),
+  desejos: texto(),
+  necessidades: texto(),
+  objetivo_cliente: texto(),
+  objetivo_redes_sociais: texto(),
+  posicionamento: texto(),
+  diferenciais: texto(),
+  tom_comunicacao: texto(),
+  ativo: z.boolean().default(true),
+});
+export type ClienteInput = z.input<typeof clienteSchema>;
 
 const conteudoSchema = z.object({
   cliente_id: z.string().uuid(),
   tipo: z.enum(["reel", "carrossel", "story", "post"]),
-  categoria: z.string().nullable().optional(),
+  categoria: texto(),
   titulo: z.string().min(1, "Informe o título"),
-  ideia: z.string().nullable().optional(),
-  roteiro: z.string().nullable().optional(),
-  legenda: z.string().nullable().optional(),
-  cta: z.string().nullable().optional(),
+  ideia: texto(),
+  roteiro: texto(),
+  legenda: texto(),
+  cta: texto(),
   status: z.enum(["ideia", "planejado", "produzido", "publicado"]),
-  data_planejada: z.string().nullable().optional(),
+  data_planejada: texto(),
 });
-export type ConteudoInput = z.infer<typeof conteudoSchema>;
+export type ConteudoInput = z.input<typeof conteudoSchema>;
 
 function unwrap<T>(result: { data: T | null; error: { message: string } | null }): T {
   if (result.error) throw new Error(result.error.message);
