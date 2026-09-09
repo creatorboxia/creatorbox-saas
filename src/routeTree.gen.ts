@@ -18,6 +18,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedClientesClienteIdRouteRouteImport } from './routes/_authenticated/clientes/$clienteId/route'
 import { Route as AuthenticatedClientesNovoRouteImport } from './routes/_authenticated/clientes/novo'
 import { Route as AuthenticatedClientesClienteIdIndexRouteImport } from './routes/_authenticated/clientes/$clienteId/index'
+import { Route as AuthenticatedClientesClienteIdEstrategiaRouteImport } from './routes/_authenticated/clientes/$clienteId/estrategia'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -66,6 +67,12 @@ const AuthenticatedClientesClienteIdIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedClientesClienteIdRouteRoute,
   } as any)
+const AuthenticatedClientesClienteIdEstrategiaRoute =
+  AuthenticatedClientesClienteIdEstrategiaRouteImport.update({
+    id: '/estrategia',
+    path: '/estrategia',
+    getParentRoute: () => AuthenticatedClientesClienteIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
   '/clientes/$clienteId/': typeof AuthenticatedClientesClienteIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -84,6 +92,7 @@ export interface FileRoutesByTo {
   '/chat': typeof AuthenticatedChatRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
   '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdIndexRoute
 }
 export interface FileRoutesById {
@@ -96,6 +105,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
   '/_authenticated/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/_authenticated/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
   '/_authenticated/clientes/$clienteId/': typeof AuthenticatedClientesClienteIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/clientes/$clienteId'
     | '/clientes/novo'
+    | '/clientes/$clienteId/estrategia'
     | '/clientes/$clienteId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/dashboard'
     | '/clientes/novo'
+    | '/clientes/$clienteId/estrategia'
     | '/clientes/$clienteId'
   id:
     | '__root__'
@@ -128,6 +140,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/clientes/$clienteId'
     | '/_authenticated/clientes/novo'
+    | '/_authenticated/clientes/$clienteId/estrategia'
     | '/_authenticated/clientes/$clienteId/'
   fileRoutesById: FileRoutesById
 }
@@ -203,15 +216,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesClienteIdIndexRouteImport
       parentRoute: typeof AuthenticatedClientesClienteIdRouteRoute
     }
+    '/_authenticated/clientes/$clienteId/estrategia': {
+      id: '/_authenticated/clientes/$clienteId/estrategia'
+      path: '/estrategia'
+      fullPath: '/clientes/$clienteId/estrategia'
+      preLoaderRoute: typeof AuthenticatedClientesClienteIdEstrategiaRouteImport
+      parentRoute: typeof AuthenticatedClientesClienteIdRouteRoute
+    }
   }
 }
 
 interface AuthenticatedClientesClienteIdRouteRouteChildren {
+  AuthenticatedClientesClienteIdEstrategiaRoute: typeof AuthenticatedClientesClienteIdEstrategiaRoute
   AuthenticatedClientesClienteIdIndexRoute: typeof AuthenticatedClientesClienteIdIndexRoute
 }
 
 const AuthenticatedClientesClienteIdRouteRouteChildren: AuthenticatedClientesClienteIdRouteRouteChildren =
   {
+    AuthenticatedClientesClienteIdEstrategiaRoute:
+      AuthenticatedClientesClienteIdEstrategiaRoute,
     AuthenticatedClientesClienteIdIndexRoute:
       AuthenticatedClientesClienteIdIndexRoute,
   }
