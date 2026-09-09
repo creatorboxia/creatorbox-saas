@@ -18,6 +18,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedClientesClienteIdRouteRouteImport } from './routes/_authenticated/clientes/$clienteId/route'
 import { Route as AuthenticatedClientesNovoRouteImport } from './routes/_authenticated/clientes/novo'
 import { Route as AuthenticatedClientesClienteIdIndexRouteImport } from './routes/_authenticated/clientes/$clienteId/index'
+import { Route as AuthenticatedClientesClienteIdCalendarioRouteImport } from './routes/_authenticated/clientes/$clienteId/calendario'
 import { Route as AuthenticatedClientesClienteIdEstrategiaRouteImport } from './routes/_authenticated/clientes/$clienteId/estrategia'
 
 const IndexRoute = IndexRouteImport.update({
@@ -67,6 +68,12 @@ const AuthenticatedClientesClienteIdIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedClientesClienteIdRouteRoute,
   } as any)
+const AuthenticatedClientesClienteIdCalendarioRoute =
+  AuthenticatedClientesClienteIdCalendarioRouteImport.update({
+    id: '/calendario',
+    path: '/calendario',
+    getParentRoute: () => AuthenticatedClientesClienteIdRouteRoute,
+  } as any)
 const AuthenticatedClientesClienteIdEstrategiaRoute =
   AuthenticatedClientesClienteIdEstrategiaRouteImport.update({
     id: '/estrategia',
@@ -82,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
   '/clientes/$clienteId/': typeof AuthenticatedClientesClienteIdIndexRoute
 }
@@ -92,6 +100,7 @@ export interface FileRoutesByTo {
   '/chat': typeof AuthenticatedChatRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
   '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdIndexRoute
 }
@@ -105,6 +114,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
   '/_authenticated/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/_authenticated/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/_authenticated/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
   '/_authenticated/clientes/$clienteId/': typeof AuthenticatedClientesClienteIdIndexRoute
 }
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/clientes/$clienteId'
     | '/clientes/novo'
+    | '/clientes/$clienteId/calendario'
     | '/clientes/$clienteId/estrategia'
     | '/clientes/$clienteId/'
   fileRoutesByTo: FileRoutesByTo
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/dashboard'
     | '/clientes/novo'
+    | '/clientes/$clienteId/calendario'
     | '/clientes/$clienteId/estrategia'
     | '/clientes/$clienteId'
   id:
@@ -140,6 +152,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/clientes/$clienteId'
     | '/_authenticated/clientes/novo'
+    | '/_authenticated/clientes/$clienteId/calendario'
     | '/_authenticated/clientes/$clienteId/estrategia'
     | '/_authenticated/clientes/$clienteId/'
   fileRoutesById: FileRoutesById
@@ -216,6 +229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesClienteIdIndexRouteImport
       parentRoute: typeof AuthenticatedClientesClienteIdRouteRoute
     }
+    '/_authenticated/clientes/$clienteId/calendario': {
+      id: '/_authenticated/clientes/$clienteId/calendario'
+      path: '/calendario'
+      fullPath: '/clientes/$clienteId/calendario'
+      preLoaderRoute: typeof AuthenticatedClientesClienteIdCalendarioRouteImport
+      parentRoute: typeof AuthenticatedClientesClienteIdRouteRoute
+    }
     '/_authenticated/clientes/$clienteId/estrategia': {
       id: '/_authenticated/clientes/$clienteId/estrategia'
       path: '/estrategia'
@@ -227,12 +247,15 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedClientesClienteIdRouteRouteChildren {
+  AuthenticatedClientesClienteIdCalendarioRoute: typeof AuthenticatedClientesClienteIdCalendarioRoute
   AuthenticatedClientesClienteIdEstrategiaRoute: typeof AuthenticatedClientesClienteIdEstrategiaRoute
   AuthenticatedClientesClienteIdIndexRoute: typeof AuthenticatedClientesClienteIdIndexRoute
 }
 
 const AuthenticatedClientesClienteIdRouteRouteChildren: AuthenticatedClientesClienteIdRouteRouteChildren =
   {
+    AuthenticatedClientesClienteIdCalendarioRoute:
+      AuthenticatedClientesClienteIdCalendarioRoute,
     AuthenticatedClientesClienteIdEstrategiaRoute:
       AuthenticatedClientesClienteIdEstrategiaRoute,
     AuthenticatedClientesClienteIdIndexRoute:
