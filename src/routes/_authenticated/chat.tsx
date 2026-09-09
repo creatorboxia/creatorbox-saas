@@ -61,7 +61,7 @@ function Chat() {
   }, [mensagens]);
 
   const nova = useMutation({
-    mutationFn: () => createConversa({ data: {} }),
+    mutationFn: async () => (await createConversa({ data: {} })) as { id: string } | null,
     onSuccess: async (conversa) => {
       await queryClient.invalidateQueries({ queryKey: ["conversas"] });
       if (conversa) setConversaId(conversa.id);
@@ -75,7 +75,7 @@ function Chat() {
     mutationFn: async (conteudo: string) => {
       let id: string | null = conversaId;
       if (!id) {
-        const conversa = await createConversa({ data: {} });
+        const conversa = (await createConversa({ data: {} })) as { id: string } | null;
         id = conversa?.id ?? null;
         if (!id) throw new Error("Não foi possível iniciar a conversa");
         setConversaId(id);
