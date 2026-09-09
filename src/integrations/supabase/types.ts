@@ -14,7 +14,237 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      clientes: {
+        Row: {
+          ativo: boolean
+          cidade: string | null
+          created_at: string
+          desejos: string | null
+          diferenciais: string | null
+          dores: string | null
+          faixa_etaria: string | null
+          id: string
+          instagram: string | null
+          necessidades: string | null
+          nicho: string | null
+          nome: string
+          objetivo_cliente: string | null
+          objetivo_redes_sociais: string | null
+          perfil_consumidor: string | null
+          posicionamento: string | null
+          publico_alvo: string | null
+          servico_produto: string | null
+          tom_comunicacao: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          cidade?: string | null
+          created_at?: string
+          desejos?: string | null
+          diferenciais?: string | null
+          dores?: string | null
+          faixa_etaria?: string | null
+          id?: string
+          instagram?: string | null
+          necessidades?: string | null
+          nicho?: string | null
+          nome: string
+          objetivo_cliente?: string | null
+          objetivo_redes_sociais?: string | null
+          perfil_consumidor?: string | null
+          posicionamento?: string | null
+          publico_alvo?: string | null
+          servico_produto?: string | null
+          tom_comunicacao?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          ativo?: boolean
+          cidade?: string | null
+          created_at?: string
+          desejos?: string | null
+          diferenciais?: string | null
+          dores?: string | null
+          faixa_etaria?: string | null
+          id?: string
+          instagram?: string | null
+          necessidades?: string | null
+          nicho?: string | null
+          nome?: string
+          objetivo_cliente?: string | null
+          objetivo_redes_sociais?: string | null
+          perfil_consumidor?: string | null
+          posicionamento?: string | null
+          publico_alvo?: string | null
+          servico_produto?: string | null
+          tom_comunicacao?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      conteudos: {
+        Row: {
+          categoria: string | null
+          cliente_id: string
+          created_at: string
+          cta: string | null
+          data_planejada: string | null
+          google_event_id: string | null
+          id: string
+          ideia: string | null
+          legenda: string | null
+          roteiro: string | null
+          status: string
+          tipo: string
+          titulo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          categoria?: string | null
+          cliente_id: string
+          created_at?: string
+          cta?: string | null
+          data_planejada?: string | null
+          google_event_id?: string | null
+          id?: string
+          ideia?: string | null
+          legenda?: string | null
+          roteiro?: string | null
+          status?: string
+          tipo?: string
+          titulo: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          categoria?: string | null
+          cliente_id?: string
+          created_at?: string
+          cta?: string | null
+          data_planejada?: string | null
+          google_event_id?: string | null
+          id?: string
+          ideia?: string | null
+          legenda?: string | null
+          roteiro?: string | null
+          status?: string
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conteudos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversas: {
+        Row: {
+          cliente_id: string | null
+          created_at: string
+          id: string
+          titulo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cliente_id?: string | null
+          created_at?: string
+          id?: string
+          titulo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          cliente_id?: string | null
+          created_at?: string
+          id?: string
+          titulo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mensagens: {
+        Row: {
+          conteudo: string
+          conversa_id: string
+          created_at: string
+          id: string
+          role: string
+        }
+        Insert: {
+          conteudo: string
+          conversa_id: string
+          created_at?: string
+          id?: string
+          role: string
+        }
+        Update: {
+          conteudo?: string
+          conversa_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mensagens_conversa_id_fkey"
+            columns: ["conversa_id"]
+            isOneToOne: false
+            referencedRelation: "conversas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          nome: string | null
+          plano: string
+          status_assinatura: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+          nome?: string | null
+          plano?: string
+          status_assinatura?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome?: string | null
+          plano?: string
+          status_assinatura?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
