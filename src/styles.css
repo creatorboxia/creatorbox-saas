@@ -111,7 +111,6 @@
 
   #lovable.badge{
     display: none !important;
-  
   }
   
   body {
@@ -122,6 +121,7 @@
   }
   #lovable.badge{
     display: none !important;
+  }
   h1,
   h2,
   h3,
