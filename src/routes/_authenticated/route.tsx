@@ -22,7 +22,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/external/client";
 import { listClientes } from "@/lib/creatorbox.functions";
 
 export const Route = createFileRoute("/_authenticated")({
