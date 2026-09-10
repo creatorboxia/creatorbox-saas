@@ -17,6 +17,10 @@ import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedClientesClienteIdRouteRouteImport } from './routes/_authenticated/clientes/$clienteId/route'
 import { Route as AuthenticatedClientesNovoRouteImport } from './routes/_authenticated/clientes/novo'
+import { Route as AuthenticatedFerramentasCalendarioRouteImport } from './routes/_authenticated/ferramentas/calendario'
+import { Route as AuthenticatedFerramentasConteudosRouteImport } from './routes/_authenticated/ferramentas/conteudos'
+import { Route as AuthenticatedFerramentasIdeiasRouteImport } from './routes/_authenticated/ferramentas/ideias'
+import { Route as AuthenticatedFerramentasRoteirosRouteImport } from './routes/_authenticated/ferramentas/roteiros'
 import { Route as AuthenticatedClientesClienteIdIndexRouteImport } from './routes/_authenticated/clientes/$clienteId/index'
 import { Route as AuthenticatedClientesClienteIdCalendarioRouteImport } from './routes/_authenticated/clientes/$clienteId/calendario'
 import { Route as AuthenticatedClientesClienteIdConteudosRouteImport } from './routes/_authenticated/clientes/$clienteId/conteudos'
@@ -64,6 +68,30 @@ const AuthenticatedClientesNovoRoute =
     path: '/clientes/novo',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedFerramentasCalendarioRoute =
+  AuthenticatedFerramentasCalendarioRouteImport.update({
+    id: '/ferramentas/calendario',
+    path: '/ferramentas/calendario',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedFerramentasConteudosRoute =
+  AuthenticatedFerramentasConteudosRouteImport.update({
+    id: '/ferramentas/conteudos',
+    path: '/ferramentas/conteudos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedFerramentasIdeiasRoute =
+  AuthenticatedFerramentasIdeiasRouteImport.update({
+    id: '/ferramentas/ideias',
+    path: '/ferramentas/ideias',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedFerramentasRoteirosRoute =
+  AuthenticatedFerramentasRoteirosRouteImport.update({
+    id: '/ferramentas/roteiros',
+    path: '/ferramentas/roteiros',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedClientesClienteIdIndexRoute =
   AuthenticatedClientesClienteIdIndexRouteImport.update({
     id: '/',
@@ -103,6 +131,10 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/ferramentas/calendario': typeof AuthenticatedFerramentasCalendarioRoute
+  '/ferramentas/conteudos': typeof AuthenticatedFerramentasConteudosRoute
+  '/ferramentas/ideias': typeof AuthenticatedFerramentasIdeiasRoute
+  '/ferramentas/roteiros': typeof AuthenticatedFerramentasRoteirosRoute
   '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
@@ -116,6 +148,10 @@ export interface FileRoutesByTo {
   '/chat': typeof AuthenticatedChatRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/ferramentas/calendario': typeof AuthenticatedFerramentasCalendarioRoute
+  '/ferramentas/conteudos': typeof AuthenticatedFerramentasConteudosRoute
+  '/ferramentas/ideias': typeof AuthenticatedFerramentasIdeiasRoute
+  '/ferramentas/roteiros': typeof AuthenticatedFerramentasRoteirosRoute
   '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
@@ -132,6 +168,10 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
   '/_authenticated/clientes/novo': typeof AuthenticatedClientesNovoRoute
+  '/_authenticated/ferramentas/calendario': typeof AuthenticatedFerramentasCalendarioRoute
+  '/_authenticated/ferramentas/conteudos': typeof AuthenticatedFerramentasConteudosRoute
+  '/_authenticated/ferramentas/ideias': typeof AuthenticatedFerramentasIdeiasRoute
+  '/_authenticated/ferramentas/roteiros': typeof AuthenticatedFerramentasRoteirosRoute
   '/_authenticated/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/_authenticated/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/_authenticated/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
@@ -148,6 +188,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/clientes/$clienteId'
     | '/clientes/novo'
+    | '/ferramentas/calendario'
+    | '/ferramentas/conteudos'
+    | '/ferramentas/ideias'
+    | '/ferramentas/roteiros'
     | '/clientes/$clienteId/calendario'
     | '/clientes/$clienteId/conteudos'
     | '/clientes/$clienteId/estrategia'
@@ -161,6 +205,10 @@ export interface FileRouteTypes {
     | '/chat'
     | '/dashboard'
     | '/clientes/novo'
+    | '/ferramentas/calendario'
+    | '/ferramentas/conteudos'
+    | '/ferramentas/ideias'
+    | '/ferramentas/roteiros'
     | '/clientes/$clienteId/calendario'
     | '/clientes/$clienteId/conteudos'
     | '/clientes/$clienteId/estrategia'
@@ -176,6 +224,10 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/clientes/$clienteId'
     | '/_authenticated/clientes/novo'
+    | '/_authenticated/ferramentas/calendario'
+    | '/_authenticated/ferramentas/conteudos'
+    | '/_authenticated/ferramentas/ideias'
+    | '/_authenticated/ferramentas/roteiros'
     | '/_authenticated/clientes/$clienteId/calendario'
     | '/_authenticated/clientes/$clienteId/conteudos'
     | '/_authenticated/clientes/$clienteId/estrategia'
@@ -248,6 +300,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesNovoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/ferramentas/calendario': {
+      id: '/_authenticated/ferramentas/calendario'
+      path: '/ferramentas/calendario'
+      fullPath: '/ferramentas/calendario'
+      preLoaderRoute: typeof AuthenticatedFerramentasCalendarioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ferramentas/conteudos': {
+      id: '/_authenticated/ferramentas/conteudos'
+      path: '/ferramentas/conteudos'
+      fullPath: '/ferramentas/conteudos'
+      preLoaderRoute: typeof AuthenticatedFerramentasConteudosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ferramentas/ideias': {
+      id: '/_authenticated/ferramentas/ideias'
+      path: '/ferramentas/ideias'
+      fullPath: '/ferramentas/ideias'
+      preLoaderRoute: typeof AuthenticatedFerramentasIdeiasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ferramentas/roteiros': {
+      id: '/_authenticated/ferramentas/roteiros'
+      path: '/ferramentas/roteiros'
+      fullPath: '/ferramentas/roteiros'
+      preLoaderRoute: typeof AuthenticatedFerramentasRoteirosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/clientes/$clienteId/': {
       id: '/_authenticated/clientes/$clienteId/'
       path: '/'
@@ -318,6 +398,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedClientesClienteIdRouteRoute: typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
   AuthenticatedClientesNovoRoute: typeof AuthenticatedClientesNovoRoute
+  AuthenticatedFerramentasCalendarioRoute: typeof AuthenticatedFerramentasCalendarioRoute
+  AuthenticatedFerramentasConteudosRoute: typeof AuthenticatedFerramentasConteudosRoute
+  AuthenticatedFerramentasIdeiasRoute: typeof AuthenticatedFerramentasIdeiasRoute
+  AuthenticatedFerramentasRoteirosRoute: typeof AuthenticatedFerramentasRoteirosRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -326,6 +410,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClientesClienteIdRouteRoute:
     AuthenticatedClientesClienteIdRouteRouteWithChildren,
   AuthenticatedClientesNovoRoute: AuthenticatedClientesNovoRoute,
+  AuthenticatedFerramentasCalendarioRoute:
+    AuthenticatedFerramentasCalendarioRoute,
+  AuthenticatedFerramentasConteudosRoute:
+    AuthenticatedFerramentasConteudosRoute,
+  AuthenticatedFerramentasIdeiasRoute: AuthenticatedFerramentasIdeiasRoute,
+  AuthenticatedFerramentasRoteirosRoute: AuthenticatedFerramentasRoteirosRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
