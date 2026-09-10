@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireExternalAuth } from "@/integrations/external/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 
 export type Cliente = Database["public"]["Tables"]["clientes"]["Row"];
@@ -52,7 +52,7 @@ function unwrap<T>(result: { data: T | null; error: { message: string } | null }
 /* ---------------------------------- perfil --------------------------------- */
 
 export const getPerfil = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireExternalAuth])
   .handler(async ({ context }) =>
     unwrap(
       await context.supabase
@@ -66,7 +66,7 @@ export const getPerfil = createServerFn({ method: "GET" })
 /* --------------------------------- clientes -------------------------------- */
 
 export const listClientes = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireExternalAuth])
   .handler(async ({ context }): Promise<Cliente[]> =>
     unwrap(
       await context.supabase
@@ -77,14 +77,14 @@ export const listClientes = createServerFn({ method: "GET" })
   );
 
 export const getCliente = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireExternalAuth])
   .inputValidator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }): Promise<Cliente | null> =>
     unwrap(await context.supabase.from("clientes").select("*").eq("id", data.id).maybeSingle()),
   );
 
 export const createCliente = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireExternalAuth])
   .inputValidator((data: ClienteInput) => clienteSchema.parse(data))
   .handler(async ({ data, context }) =>
     unwrap(
@@ -97,7 +97,7 @@ export const createCliente = createServerFn({ method: "POST" })
   );
 
 export const updateCliente = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireExternalAuth])
   .inputValidator((data: ClienteInput & { id: string }) =>
     clienteSchema.extend({ id: z.string().uuid() }).parse(data),
   )
@@ -109,7 +109,7 @@ export const updateCliente = createServerFn({ method: "POST" })
   });
 
 export const deleteCliente = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireExternalAuth])
   .inputValidator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("clientes").delete().eq("id", data.id);
@@ -120,7 +120,7 @@ export const deleteCliente = createServerFn({ method: "POST" })
 /* -------------------------------- conteudos -------------------------------- */
 
 export const listConteudos = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireExternalAuth])
   .inputValidator((data: { clienteId?: string | null }) =>
     z.object({ clienteId: z.string().uuid().nullable().optional() }).parse(data),
   )
@@ -134,7 +134,7 @@ export const listConteudos = createServerFn({ method: "GET" })
   });
 
 export const saveConteudo = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireExternalAuth])
   .inputValidator((data: ConteudoInput & { id?: string }) =>
     conteudoSchema.extend({ id: z.string().uuid().optional() }).parse(data),
   )
@@ -156,7 +156,7 @@ export const saveConteudo = createServerFn({ method: "POST" })
   });
 
 export const deleteConteudo = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireExternalAuth])
   .inputValidator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("conteudos").delete().eq("id", data.id);
@@ -167,7 +167,7 @@ export const deleteConteudo = createServerFn({ method: "POST" })
 /* -------------------------------- dashboard -------------------------------- */
 
 export const getDashboard = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireExternalAuth])
   .handler(async ({ context }) => {
     const clientes = unwrap(
       await context.supabase
@@ -196,7 +196,7 @@ export const getDashboard = createServerFn({ method: "GET" })
 /* ---------------------------------- chat ---------------------------------- */
 
 export const listConversas = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireExternalAuth])
   .handler(async ({ context }) =>
     unwrap(
       await context.supabase
@@ -207,7 +207,7 @@ export const listConversas = createServerFn({ method: "GET" })
   );
 
 export const createConversa = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireExternalAuth])
   .inputValidator((data: { titulo?: string; clienteId?: string | null }) =>
     z
       .object({
@@ -231,7 +231,7 @@ export const createConversa = createServerFn({ method: "POST" })
   );
 
 export const listMensagens = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireExternalAuth])
   .inputValidator((data: { conversaId: string }) =>
     z.object({ conversaId: z.string().uuid() }).parse(data),
   )
@@ -247,7 +247,7 @@ export const listMensagens = createServerFn({ method: "GET" })
 
 // Fase atual: a resposta do assistente é simulada — sem IA conectada ainda.
 export const sendMensagem = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireExternalAuth])
   .inputValidator((data: { conversaId: string; conteudo: string }) =>
     z
       .object({ conversaId: z.string().uuid(), conteudo: z.string().min(1) })
