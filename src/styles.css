@@ -109,6 +109,11 @@
     color-scheme: dark;
   }
 
+  #lovable.badge{
+    display: none !important;
+  
+  }
+  
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
