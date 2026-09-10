@@ -81,7 +81,10 @@ function CalendarioGeral() {
             Todas as publicações planejadas, de todos os clientes.
           </p>
         </div>
-        <FiltroCliente valor={filtro} onChange={setFiltro} />
+        <div className="flex gap-2">
+          <FiltroCliente valor={filtro} onChange={setFiltro} />
+          <NovoEvento clientes={clientes ?? []} />
+        </div>
       </div>
 
       <div className="mt-8 flex items-center justify-between">
