@@ -133,6 +133,22 @@ export const listConteudos = createServerFn({ method: "GET" })
     return unwrap(await query);
   });
 
+async function assertClienteOwnership(
+  supabase: SupabaseClientType,
+  clienteId: string,
+  userId: string,
+) {
+  const { data, error } = await supabase
+    .from("clientes")
+    .select("id")
+    .eq("id", clienteId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Cliente não encontrado ou sem permissão");
+}
+
 export const saveConteudo = createServerFn({ method: "POST" })
   .middleware([requireExternalAuth])
   .inputValidator((data: ConteudoInput & { id?: string }) =>
@@ -140,6 +156,11 @@ export const saveConteudo = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { id, ...rest } = data;
+
+    // Garante que o cliente_id informado pertence a este usuário,
+    // tanto na criação quanto na edição.
+    await assertClienteOwnership(context.supabase, rest.cliente_id, context.userId);
+
     const payload = { ...rest, data_planejada: rest.data_planejada || null };
     if (id) {
       return unwrap(
@@ -216,8 +237,14 @@ export const createConversa = createServerFn({ method: "POST" })
       })
       .parse(data),
   )
-  .handler(async ({ data, context }) =>
-    unwrap(
+  .handler(async ({ data, context }) => {
+    // Só valida ownership se um cliente foi de fato informado
+    // (clienteId é opcional: chat geral não tem cliente vinculado).
+    if (data.clienteId) {
+      await assertClienteOwnership(context.supabase, data.clienteId, context.userId);
+    }
+
+    return unwrap(
       await context.supabase
         .from("conversas")
         .insert({
@@ -227,8 +254,8 @@ export const createConversa = createServerFn({ method: "POST" })
         })
         .select("id, titulo, cliente_id, created_at")
         .single(),
-    ),
-  );
+    );
+  });
 
 export const listMensagens = createServerFn({ method: "GET" })
   .middleware([requireExternalAuth])
