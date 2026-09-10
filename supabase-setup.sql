@@ -144,3 +144,7 @@ CREATE TRIGGER clientes_touch BEFORE UPDATE ON public.clientes FOR EACH ROW EXEC
 CREATE TRIGGER conteudos_touch BEFORE UPDATE ON public.conteudos FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 CREATE TRIGGER conversas_touch BEFORE UPDATE ON public.conversas FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 CREATE TRIGGER profiles_touch BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
+
+-- trigger functions must not be callable through the API
+REVOKE ALL ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.touch_updated_at() FROM PUBLIC, anon, authenticated;
