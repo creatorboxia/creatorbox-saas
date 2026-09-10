@@ -225,7 +225,13 @@ function NavItem({
   label,
   onNavigate,
 }: {
-  to: "/dashboard" | "/chat";
+  to:
+    | "/dashboard"
+    | "/chat"
+    | "/ferramentas/calendario"
+    | "/ferramentas/ideias"
+    | "/ferramentas/roteiros"
+    | "/ferramentas/conteudos";
   icon: typeof CalendarDays;
   label: string;
   onNavigate: () => void;
