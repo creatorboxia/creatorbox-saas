@@ -1,11 +1,28 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { useClientes, FiltroCliente } from "@/components/filtro-cliente";
 import { Button } from "@/components/ui/button";
-import { listConteudos } from "@/lib/creatorbox.functions";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { listConteudos, saveConteudo } from "@/lib/creatorbox.functions";
 
 export const Route = createFileRoute("/_authenticated/ferramentas/calendario")({
   head: () => ({
