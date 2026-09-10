@@ -7,7 +7,17 @@ import {
   useNavigate,
   useParams,
 } from "@tanstack/react-router";
-import { CalendarDays, Home, LogOut, Plus, Sparkles, Users } from "lucide-react";
+import {
+  CalendarDays,
+  Clapperboard,
+  FileText,
+  Home,
+  Lightbulb,
+  LogOut,
+  Plus,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -90,6 +100,38 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
       <nav className="space-y-1 px-3">
         <NavItem to="/dashboard" icon={Home} label="Painel" onNavigate={onNavigate} />
         <NavItem to="/chat" icon={Sparkles} label="Início (chat geral)" onNavigate={onNavigate} />
+      </nav>
+
+      <div className="mt-7 px-5">
+        <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Ferramentas
+        </span>
+      </div>
+      <nav className="mt-2 space-y-1 px-3">
+        <NavItem
+          to="/ferramentas/calendario"
+          icon={CalendarDays}
+          label="Calendário"
+          onNavigate={onNavigate}
+        />
+        <NavItem
+          to="/ferramentas/ideias"
+          icon={Lightbulb}
+          label="Ideias"
+          onNavigate={onNavigate}
+        />
+        <NavItem
+          to="/ferramentas/roteiros"
+          icon={Clapperboard}
+          label="Roteiros"
+          onNavigate={onNavigate}
+        />
+        <NavItem
+          to="/ferramentas/conteudos"
+          icon={FileText}
+          label="Conteúdos"
+          onNavigate={onNavigate}
+        />
       </nav>
 
       <div className="mt-7 flex items-center justify-between px-5">
@@ -183,7 +225,13 @@ function NavItem({
   label,
   onNavigate,
 }: {
-  to: "/dashboard" | "/chat";
+  to:
+    | "/dashboard"
+    | "/chat"
+    | "/ferramentas/calendario"
+    | "/ferramentas/ideias"
+    | "/ferramentas/roteiros"
+    | "/ferramentas/conteudos";
   icon: typeof CalendarDays;
   label: string;
   onNavigate: () => void;
