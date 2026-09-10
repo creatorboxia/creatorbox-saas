@@ -120,7 +120,8 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
-
+  #lovable.badge{
+    display: none !important;
   h1,
   h2,
   h3,
