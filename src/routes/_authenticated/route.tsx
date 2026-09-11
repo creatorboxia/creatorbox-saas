@@ -89,7 +89,8 @@ function AppLayout() {
           <Button variant="outline" size="sm" onClick={() => setAberto(true)}>
             Menu
           </Button>
-          <span className="font-display font-semibold">
+          <span className="flex items-center gap-2 font-display font-semibold">
+            <LogoMark className="size-7" />
             Creator<span className="text-primary">Box</span>
           </span>
         </header>
@@ -120,8 +121,8 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
   return (
     <div className="flex h-full flex-col">
       <div className="px-5 py-6">
-        <Link to="/dashboard" onClick={onNavigate} className="font-display text-lg font-semibold">
-          Creator<span className="text-primary">Box</span>
+        <Link to="/dashboard" onClick={onNavigate} aria-label="CreatorBox">
+          <Logo />
         </Link>
       </div>
 
