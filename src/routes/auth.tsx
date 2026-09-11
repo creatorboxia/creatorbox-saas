@@ -146,7 +146,7 @@ function AuthPage() {
   return (
     <Shell>
       <h1 className="text-2xl font-semibold">
-        Creator<span className="text-primary">Box</span>
+        <img src="/logo-icone.png" alt="CreatorBox" className="h-8" />
       </h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Seu espaço para organizar os clientes que você atende.
