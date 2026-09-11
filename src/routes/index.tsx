@@ -54,7 +54,7 @@ function Landing() {
   return (
     <main className="min-h-screen surface-grid">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <img src="/logo.png" alt="CreatorBox" className="h-8" />
+        <img src="/logo.png" widht="870px" alt="CreatorBox" className="h-8" />
         <Button asChild variant="ghost" size="sm">
           <Link to="/auth">Entrar</Link>
         </Button>
