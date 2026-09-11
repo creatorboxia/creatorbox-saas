@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus, Send } from "lucide-react";
+import { Loader2, Plus, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -126,7 +126,7 @@ function Chat() {
         <div className="border-b border-border px-6 py-4">
           <h1 className="text-lg font-semibold">Chat de ideias</h1>
           <p className="text-xs text-muted-foreground">
-            Versão de demonstração: as respostas ainda não vêm de uma inteligência artificial.
+            Peça pautas, roteiros e legendas — o assistente usa as informações do cliente.
           </p>
         </div>
 
@@ -152,6 +152,15 @@ function Chat() {
               </div>
             </div>
           ))}
+          {enviar.isPending && (
+            <div className="flex justify-start">
+              <div className="flex items-center gap-1.5 rounded-2xl border border-border bg-card px-4 py-3.5">
+                <span className="size-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
+                <span className="size-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
+                <span className="size-2 animate-bounce rounded-full bg-primary" />
+              </div>
+            </div>
+          )}
           <div ref={fim} />
         </div>
 
@@ -167,11 +176,16 @@ function Chat() {
             value={texto}
             rows={2}
             placeholder="Escreva sua ideia ou pergunta..."
+            disabled={enviar.isPending}
             onChange={(e) => setTexto(e.target.value)}
             className="resize-none"
           />
           <Button type="submit" disabled={enviar.isPending || texto.trim() === ""}>
-            <Send className="size-4" />
+            {enviar.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Send className="size-4" />
+            )}
           </Button>
         </form>
       </div>
