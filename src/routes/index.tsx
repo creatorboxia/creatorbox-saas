@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarDays, MessagesSquare, Sparkles, Target, Users } from "lucide-react";
 
+import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -53,9 +54,7 @@ function Landing() {
   return (
     <main className="min-h-screen surface-grid">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <span className="font-display text-lg font-semibold tracking-tight">
-          Creator<span className="text-primary">Box</span>
-        </span>
+        <Logo />
         <Button asChild variant="ghost" size="sm">
           <Link to="/auth">Entrar</Link>
         </Button>

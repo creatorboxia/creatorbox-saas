@@ -33,15 +33,29 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [verificando, setVerificando] = useState(true);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [aguardandoConfirmacao, setAguardandoConfirmacao] = useState(false);
 
   useEffect(() => {
+    let ativo = true;
     void supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard", replace: true });
+      if (!ativo) return;
+      if (data.session) {
+        navigate({ to: "/dashboard", replace: true });
+        return;
+      }
+      setVerificando(false);
     });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) navigate({ to: "/dashboard", replace: true });
+    });
+    return () => {
+      ativo = false;
+      sub.subscription.unsubscribe();
+    };
   }, [navigate]);
 
   async function entrar(e: React.FormEvent) {
@@ -80,7 +94,7 @@ function AuthPage() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin },
+      options: { redirectTo: `${window.location.origin}/dashboard` },
     });
     if (error) {
       setLoading(false);
@@ -101,6 +115,17 @@ function AuthPage() {
       return;
     }
     toast.success("Enviamos um e-mail com o link para criar uma nova senha.");
+  }
+
+  if (verificando) {
+    return (
+      <Shell>
+        <div className="flex flex-col items-center gap-3 py-8">
+          <Loader2 className="size-6 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Verificando sua sessão...</p>
+        </div>
+      </Shell>
+    );
   }
 
   if (aguardandoConfirmacao) {

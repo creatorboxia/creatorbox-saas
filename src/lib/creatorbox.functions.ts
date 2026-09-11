@@ -1,8 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { requireExternalAuth } from "@/integrations/external/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
+
+type SupabaseClientType = SupabaseClient<Database>;
 
 export type Cliente = Database["public"]["Tables"]["clientes"]["Row"];
 export type Conteudo = Database["public"]["Tables"]["conteudos"]["Row"];
@@ -272,7 +275,37 @@ export const listMensagens = createServerFn({ method: "GET" })
     ),
   );
 
-// Fase atual: a resposta do assistente é simulada — sem IA conectada ainda.
+async function montarContextoCliente(
+  supabase: SupabaseClientType,
+  clienteId: string | null,
+): Promise<string> {
+  if (!clienteId) return "";
+  const { data } = await supabase.from("clientes").select("*").eq("id", clienteId).maybeSingle();
+  if (!data) return "";
+  const campos: [string, string | null][] = [
+    ["Cliente", data.nome],
+    ["Nicho", data.nicho],
+    ["Instagram", data.instagram],
+    ["Cidade", data.cidade],
+    ["Serviço/produto", data.servico_produto],
+    ["Público-alvo", data.publico_alvo],
+    ["Faixa etária", data.faixa_etaria],
+    ["Perfil do consumidor", data.perfil_consumidor],
+    ["Dores", data.dores],
+    ["Desejos", data.desejos],
+    ["Necessidades", data.necessidades],
+    ["Objetivo do cliente", data.objetivo_cliente],
+    ["Objetivo nas redes", data.objetivo_redes_sociais],
+    ["Posicionamento", data.posicionamento],
+    ["Diferenciais", data.diferenciais],
+    ["Tom de comunicação", data.tom_comunicacao],
+  ];
+  return campos
+    .filter(([, valor]) => valor && valor.trim() !== "")
+    .map(([rotulo, valor]) => `${rotulo}: ${valor}`)
+    .join("\n");
+}
+
 export const sendMensagem = createServerFn({ method: "POST" })
   .middleware([requireExternalAuth])
   .inputValidator((data: { conversaId: string; conteudo: string }) =>
@@ -281,6 +314,15 @@ export const sendMensagem = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
+    const conversa = unwrap<{ id: string; cliente_id: string | null } | null>(
+      await context.supabase
+        .from("conversas")
+        .select("id, cliente_id")
+        .eq("id", data.conversaId)
+        .maybeSingle(),
+    );
+    if (!conversa) throw new Error("Conversa não encontrada ou sem permissão");
+
     unwrap(
       await context.supabase
         .from("mensagens")
@@ -289,10 +331,59 @@ export const sendMensagem = createServerFn({ method: "POST" })
         .single(),
     );
 
+    const historico = unwrap(
+      await context.supabase
+        .from("mensagens")
+        .select("role, conteudo")
+        .eq("conversa_id", data.conversaId)
+        .order("created_at", { ascending: true }),
+    );
+
+    const contexto = await montarContextoCliente(context.supabase, conversa.cliente_id);
+
+    const apiKey = process.env["LOVABLE_API_KEY"];
+    if (!apiKey) throw new Error("A inteligência artificial não está configurada.");
+
+    const system =
+      "Você é o assistente do CreatorBox, especialista em social media e conteúdo para Instagram. " +
+      "Responda sempre em português do Brasil, com ideias práticas e aplicáveis: pautas, roteiros, " +
+      "legendas e CTAs. Seja direto e use listas quando ajudar." +
+      (contexto ? `\n\nContexto do cliente atendido:\n${contexto}` : "");
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Lovable-API-Key": apiKey,
+        "X-Lovable-AIG-SDK": "fetch",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3.8-flash",
+        messages: [
+          { role: "system", content: system },
+          ...historico.slice(-20).map((m) => ({ role: m.role, content: m.conteudo })),
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      const detalhe = await response.text();
+      if (response.status === 429) {
+        throw new Error("Muitas mensagens em pouco tempo. Aguarde alguns segundos e tente de novo.");
+      }
+      if (response.status === 402) {
+        throw new Error("Os créditos de inteligência artificial acabaram. Adicione créditos para continuar.");
+      }
+      throw new Error(`Falha na resposta da IA (${response.status}): ${detalhe.slice(0, 200)}`);
+    }
+
+    const payload = (await response.json()) as {
+      choices?: { message?: { content?: string } }[];
+      usage?: { prompt_tokens?: number; completion_tokens?: number };
+    };
     const resposta =
-      "Ainda estou em modo de demonstração: a inteligência artificial será conectada em uma próxima fase. " +
-      "Enquanto isso, use os campos do cliente (posicionamento, dores, desejos e tom de comunicação) como base " +
-      "para montar as ideias e registre-as em Conteúdos.";
+      payload.choices?.[0]?.message?.content?.trim() ||
+      "Não consegui gerar uma resposta agora. Tente reformular sua pergunta.";
 
     unwrap(
       await context.supabase
@@ -302,5 +393,16 @@ export const sendMensagem = createServerFn({ method: "POST" })
         .single(),
     );
 
-    return { ok: true };
+    // Registro de uso; se a tabela ainda não existir no banco, não interrompe o chat.
+    await (context.supabase as SupabaseClient)
+      .from("uso_ia")
+      .insert({
+        user_id: context.userId,
+        cliente_id: conversa.cliente_id,
+        tokens_input: payload.usage?.prompt_tokens ?? 0,
+        tokens_output: payload.usage?.completion_tokens ?? 0,
+      })
+      .then(() => undefined, () => undefined);
+
+    return { ok: true, resposta };
   });
