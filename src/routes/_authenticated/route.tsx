@@ -121,8 +121,11 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
   return (
     <div className="flex h-full flex-col">
       <div className="px-5 py-6">
-        <Link to="/dashboard" onClick={onNavigate} aria-label="CreatorBox">
-          <Logo />
+        <Link to="/dashboard" onClick={onNavigate} className="flex items-center gap-2">
+          <img src="/logo.png" alt="CreatorBox" className="h-7 w-7" />
+          <span className="font-display text-lg font-semibold">
+            Creator<span className="text-primary">Box</span>
+          </span>
         </Link>
       </div>
 
