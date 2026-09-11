@@ -13,6 +13,7 @@ import {
   FileText,
   Home,
   Lightbulb,
+  Loader2,
   LogOut,
   Plus,
   Sparkles,
@@ -20,20 +21,47 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { Logo, LogoMark } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/external/client";
 import { listClientes } from "@/lib/creatorbox.functions";
 
+// Depois do login com Google a sessão é gravada de forma assíncrona.
+// Esperamos alguns instantes antes de mandar a pessoa de volta ao login.
+async function aguardarSessao() {
+  for (let tentativa = 0; tentativa < 12; tentativa += 1) {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) return data.session;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  return null;
+}
+
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
+    const sessao = await aguardarSessao();
+    if (!sessao) throw redirect({ to: "/auth" });
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/auth" });
     return { user: data.user };
   },
+  pendingComponent: Carregando,
+  pendingMs: 0,
   component: AppLayout,
 });
+
+function Carregando() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-3">
+        <Loader2 className="size-6 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Carregando seu espaço...</p>
+      </div>
+    </div>
+  );
+}
 
 function AppLayout() {
   const [aberto, setAberto] = useState(false);
