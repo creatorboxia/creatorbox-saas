@@ -33,15 +33,29 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [verificando, setVerificando] = useState(true);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [aguardandoConfirmacao, setAguardandoConfirmacao] = useState(false);
 
   useEffect(() => {
+    let ativo = true;
     void supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard", replace: true });
+      if (!ativo) return;
+      if (data.session) {
+        navigate({ to: "/dashboard", replace: true });
+        return;
+      }
+      setVerificando(false);
     });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) navigate({ to: "/dashboard", replace: true });
+    });
+    return () => {
+      ativo = false;
+      sub.subscription.unsubscribe();
+    };
   }, [navigate]);
 
   async function entrar(e: React.FormEvent) {
