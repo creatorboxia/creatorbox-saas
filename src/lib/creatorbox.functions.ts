@@ -341,8 +341,11 @@ export const sendMensagem = createServerFn({ method: "POST" })
 
     const contexto = await montarContextoCliente(context.supabase, conversa.cliente_id);
 
-    const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey) throw new Error("A inteligência artificial não está configurada.");
+    const apiKey = process.env["OPENAI_API_KEY"];
+
+    if (!apiKey) {
+      throw new Error("A inteligência artificial não está configurada.");
+    }
 
     const system =
       "Você é o assistente do CreatorBox, especialista em social media e conteúdo para Instagram. " +
@@ -350,18 +353,20 @@ export const sendMensagem = createServerFn({ method: "POST" })
       "legendas e CTAs. Seja direto e use listas quando ajudar." +
       (contexto ? `\n\nContexto do cliente atendido:\n${contexto}` : "");
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Lovable-API-Key": apiKey,
-        "X-Lovable-AIG-SDK": "fetch",
+        "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-3.8-flash",
+        model: "gpt-5.1",
         messages: [
           { role: "system", content: system },
-          ...historico.slice(-20).map((m) => ({ role: m.role, content: m.conteudo })),
+          ...historico.slice(-20).map((m) => ({
+            role: m.role,
+            content: m.conteudo,
+          })),
         ],
       }),
     });
