@@ -89,10 +89,7 @@ function AppLayout() {
           <Button variant="outline" size="sm" onClick={() => setAberto(true)}>
             Menu
           </Button>
-          <span className="flex items-center gap-2 font-display font-semibold">
-            <LogoMark className="size-7" />
-            Cretor<span className="text-primary">Box</span>
-          </span>
+          <img src="/logo.png" alt="CreatorBox" className="h-6 w-6" />
         </header>
         <main className="min-w-0 flex-1">
           <Outlet />
