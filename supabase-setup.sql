@@ -148,3 +148,23 @@ CREATE TRIGGER profiles_touch BEFORE UPDATE ON public.profiles FOR EACH ROW EXEC
 -- trigger functions must not be callable through the API
 REVOKE ALL ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.touch_updated_at() FROM PUBLIC, anon, authenticated;
+
+-- ============================================================
+-- uso_ia: registro de consumo da inteligência artificial
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.uso_ia (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
+  cliente_id UUID REFERENCES public.clientes(id) ON DELETE SET NULL,
+  tokens_input INTEGER NOT NULL DEFAULT 0,
+  tokens_output INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS uso_ia_user_id_idx ON public.uso_ia(user_id);
+GRANT SELECT, INSERT ON public.uso_ia TO authenticated;
+GRANT ALL ON public.uso_ia TO service_role;
+ALTER TABLE public.uso_ia ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "uso_ia_select_own" ON public.uso_ia;
+CREATE POLICY "uso_ia_select_own" ON public.uso_ia FOR SELECT TO authenticated USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "uso_ia_insert_own" ON public.uso_ia;
+CREATE POLICY "uso_ia_insert_own" ON public.uso_ia FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
