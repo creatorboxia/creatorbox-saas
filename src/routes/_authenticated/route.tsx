@@ -91,7 +91,7 @@ function AppLayout() {
           </Button>
           <span className="flex items-center gap-2 font-display font-semibold">
             <LogoMark className="size-7" />
-            Creator<span className="text-primary">Box</span>
+            Cretor<span className="text-primary">Box</span>
           </span>
         </header>
         <main className="min-w-0 flex-1">
