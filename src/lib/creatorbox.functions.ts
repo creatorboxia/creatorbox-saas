@@ -1,8 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { requireExternalAuth } from "@/integrations/external/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
+
+type SupabaseClientType = SupabaseClient<Database>;
 
 export type Cliente = Database["public"]["Tables"]["clientes"]["Row"];
 export type Conteudo = Database["public"]["Tables"]["conteudos"]["Row"];
