@@ -314,7 +314,7 @@ export const sendMensagem = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
-    const conversa = unwrap(
+    const conversa = unwrap<{ id: string; cliente_id: string | null } | null>(
       await context.supabase
         .from("conversas")
         .select("id, cliente_id")
