@@ -6,12 +6,47 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/external/client";
 import {
   createConversa,
   listConversas,
   listMensagens,
-  sendMensagem,
 } from "@/lib/creatorbox.functions";
+
+// Envia a mensagem para o endpoint /api/chat, que valida o JWT,
+// checa o ownership do cliente, gera a resposta com IA e registra
+// as mensagens e o consumo de tokens em uso_ia.
+async function enviarParaApiChat(params: {
+  conversaId: string | null;
+  clienteId?: string | null;
+  mensagem: string;
+}): Promise<{ conversaId: string; resposta: string }> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error("Sessão expirada. Entre novamente.");
+
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      conversaId: params.conversaId,
+      clienteId: params.clienteId ?? null,
+      mensagem: params.mensagem,
+    }),
+  });
+
+  const payload = (await response.json().catch(() => ({}))) as {
+    conversaId?: string;
+    resposta?: string;
+    error?: string;
+  };
+  if (!response.ok) throw new Error(payload.error || "Falha ao enviar a mensagem");
+  if (!payload.conversaId) throw new Error("Resposta inválida do servidor");
+  return { conversaId: payload.conversaId, resposta: payload.resposta ?? "" };
+}
 
 export const Route = createFileRoute("/_authenticated/chat")({
   head: () => ({
@@ -73,16 +108,15 @@ function Chat() {
 
   const enviar = useMutation({
     mutationFn: async (conteudo: string) => {
-      let id: string | null = conversaId;
-      if (!id) {
-        const conversa = (await createConversa({ data: {} })) as { id: string } | null;
-        id = conversa?.id ?? null;
-        if (!id) throw new Error("Não foi possível iniciar a conversa");
-        setConversaId(id);
+      const resultado = await enviarParaApiChat({
+        conversaId,
+        mensagem: conteudo,
+      });
+      if (resultado.conversaId !== conversaId) {
+        setConversaId(resultado.conversaId);
         await queryClient.invalidateQueries({ queryKey: ["conversas"] });
       }
-      await sendMensagem({ data: { conversaId: id, conteudo } });
-      return id;
+      return resultado.conversaId;
     },
     onSuccess: (id) => {
       setTexto("");

@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedClientesClienteIdRouteRouteImport } from './routes/_authenticated/clientes/$clienteId/route'
 import { Route as AuthenticatedClientesNovoRouteImport } from './routes/_authenticated/clientes/novo'
 import { Route as AuthenticatedFerramentasCalendarioRouteImport } from './routes/_authenticated/ferramentas/calendario'
@@ -55,6 +56,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedClientesClienteIdRouteRoute =
   AuthenticatedClientesClienteIdRouteRouteImport.update({
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/chat': typeof AuthenticatedChatRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/api/chat': typeof ApiChatRoute
   '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
   '/ferramentas/calendario': typeof AuthenticatedFerramentasCalendarioRoute
@@ -147,6 +154,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/chat': typeof AuthenticatedChatRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/api/chat': typeof ApiChatRoute
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
   '/ferramentas/calendario': typeof AuthenticatedFerramentasCalendarioRoute
   '/ferramentas/conteudos': typeof AuthenticatedFerramentasConteudosRoute
@@ -166,6 +174,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/api/chat': typeof ApiChatRoute
   '/_authenticated/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
   '/_authenticated/clientes/novo': typeof AuthenticatedClientesNovoRoute
   '/_authenticated/ferramentas/calendario': typeof AuthenticatedFerramentasCalendarioRoute
@@ -186,6 +195,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/chat'
     | '/dashboard'
+    | '/api/chat'
     | '/clientes/$clienteId'
     | '/clientes/novo'
     | '/ferramentas/calendario'
@@ -204,6 +214,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/chat'
     | '/dashboard'
+    | '/api/chat'
     | '/clientes/novo'
     | '/ferramentas/calendario'
     | '/ferramentas/conteudos'
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/chat'
     | '/_authenticated/dashboard'
+    | '/api/chat'
     | '/_authenticated/clientes/$clienteId'
     | '/_authenticated/clientes/novo'
     | '/_authenticated/ferramentas/calendario'
@@ -240,6 +252,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -285,6 +298,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/clientes/$clienteId': {
       id: '/_authenticated/clientes/$clienteId'
@@ -426,6 +446,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
