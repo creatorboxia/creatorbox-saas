@@ -206,7 +206,8 @@ export const Route = createFileRoute("/api/chat")({
           });
 
           // 9. Registra o consumo de tokens (não interrompe o chat se a tabela não existir)
-          await supabase
+          // uso_ia ainda não consta nos tipos gerados do Supabase externo.
+          await (supabase as unknown as import("@supabase/supabase-js").SupabaseClient)
             .from("uso_ia")
             .insert({
               user_id: userId,
