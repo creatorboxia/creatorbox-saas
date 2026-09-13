@@ -108,16 +108,15 @@ function Chat() {
 
   const enviar = useMutation({
     mutationFn: async (conteudo: string) => {
-      let id: string | null = conversaId;
-      if (!id) {
-        const conversa = (await createConversa({ data: {} })) as { id: string } | null;
-        id = conversa?.id ?? null;
-        if (!id) throw new Error("Não foi possível iniciar a conversa");
-        setConversaId(id);
+      const resultado = await enviarParaApiChat({
+        conversaId,
+        mensagem: conteudo,
+      });
+      if (resultado.conversaId !== conversaId) {
+        setConversaId(resultado.conversaId);
         await queryClient.invalidateQueries({ queryKey: ["conversas"] });
       }
-      await sendMensagem({ data: { conversaId: id, conteudo } });
-      return id;
+      return resultado.conversaId;
     },
     onSuccess: (id) => {
       setTexto("");
