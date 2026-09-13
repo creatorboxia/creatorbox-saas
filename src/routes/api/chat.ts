@@ -177,14 +177,17 @@ export const Route = createFileRoute("/api/chat")({
           if (!aiResponse.ok) {
             if (aiResponse.status === 429) {
               return json(
-                { error: "Muitas mensagens em pouco tempo. Aguarde e tente de novo." },
+                {
+                  error:
+                    "Limite da sua conta OpenAI atingido (muitas mensagens ou saldo esgotado). Verifique seu faturamento na OpenAI.",
+                },
                 429,
               );
             }
-            if (aiResponse.status === 402) {
+            if (aiResponse.status === 401) {
               return json(
-                { error: "Os créditos de inteligência artificial acabaram." },
-                402,
+                { error: "A chave da OpenAI é inválida ou foi revogada." },
+                401,
               );
             }
             return json({ error: `Falha na IA (${aiResponse.status})` }, 502);
