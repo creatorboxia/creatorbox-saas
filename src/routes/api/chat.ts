@@ -141,8 +141,8 @@ export const Route = createFileRoute("/api/chat")({
             .eq("conversa_id", conversaIdFinal)
             .order("created_at", { ascending: true });
 
-          // 7. Gera a resposta com IA
-          const apiKey = process.env["LOVABLE_API_KEY"];
+          // 7. Gera a resposta com IA (OpenAI própria do usuário)
+          const apiKey = process.env["OPENAI_API_KEY"];
           if (!apiKey) {
             return json({ error: "A inteligência artificial não está configurada." }, 500);
           }
@@ -154,7 +154,7 @@ export const Route = createFileRoute("/api/chat")({
             (contexto ? `\n\nContexto do cliente atendido:\n${contexto}` : "");
 
           const aiResponse = await fetch(
-            "https://ai.gateway.lovable.dev/v1/chat/completions",
+            "https://api.openai.com/v1/chat/completions",
             {
               method: "POST",
               headers: {
@@ -162,7 +162,7 @@ export const Route = createFileRoute("/api/chat")({
                 Authorization: `Bearer ${apiKey}`,
               },
               body: JSON.stringify({
-                model: "google/gemini-2.5-flash",
+                model: "gpt-4o-mini",
                 messages: [
                   { role: "system", content: system },
                   ...(historico ?? []).slice(-20).map((m) => ({
@@ -177,14 +177,17 @@ export const Route = createFileRoute("/api/chat")({
           if (!aiResponse.ok) {
             if (aiResponse.status === 429) {
               return json(
-                { error: "Muitas mensagens em pouco tempo. Aguarde e tente de novo." },
+                {
+                  error:
+                    "Limite da sua conta OpenAI atingido (muitas mensagens ou saldo esgotado). Verifique seu faturamento na OpenAI.",
+                },
                 429,
               );
             }
-            if (aiResponse.status === 402) {
+            if (aiResponse.status === 401) {
               return json(
-                { error: "Os créditos de inteligência artificial acabaram." },
-                402,
+                { error: "A chave da OpenAI é inválida ou foi revogada." },
+                401,
               );
             }
             return json({ error: `Falha na IA (${aiResponse.status})` }, 502);
