@@ -1,27 +1,58 @@
 /**
  * Marca do CreatorBox.
- * O quadrado roxo com a letra B é um placeholder: quando os arquivos
- * definitivos do logo existirem, basta trocar o conteúdo de <LogoMark />
- * por <img src="/logo.svg" ... /> — o resto do app continua igual.
+ * A imagem é sempre exibida com a proporção original (object-contain),
+ * em tamanhos pré-definidos por contexto.
  */
-export function LogoMark({ className = "size-8" }: { className?: string }) {
+const tamanhos = {
+  xs: "size-6",
+  sm: "size-7",
+  md: "size-9",
+  lg: "size-12",
+} as const;
+
+export type LogoSize = keyof typeof tamanhos;
+
+export function LogoMark({
+  size = "sm",
+  className = "",
+}: {
+  size?: LogoSize;
+  className?: string;
+}) {
   return (
-    <span
+    <img
+      src="/logo.png"
+      alt=""
       aria-hidden
-      className={`inline-flex shrink-0 items-center justify-center rounded-lg bg-primary/15 ring-1 ring-primary/40 ${className}`}
-    >
-      <span className="font-display text-sm font-bold text-primary">B</span>
-    </span>
+      width={500}
+      height={500}
+      className={`block shrink-0 object-contain ${tamanhos[size]} ${className}`}
+    />
   );
 }
 
-export function Logo({ className = "" }: { className?: string }) {
+export function Logo({
+  size = "sm",
+  showName = true,
+  className = "",
+}: {
+  size?: LogoSize;
+  showName?: boolean;
+  className?: string;
+}) {
   return (
-    <span className={`inline-flex items-center gap-2 ${className}`}>
-      <LogoMark />
-      <span className="font-display text-lg font-semibold tracking-tight">
-        Creator<span className="text-primary">Box</span>
-      </span>
+    <span className={`inline-flex items-center gap-2.5 ${className}`}>
+      <LogoMark size={size} />
+      {showName && (
+        <span
+          className={`font-display font-semibold tracking-tight ${
+            size === "lg" ? "text-2xl" : size === "md" ? "text-xl" : "text-lg"
+          }`}
+        >
+          Creator<span className="text-primary">Box</span>
+        </span>
+      )}
+      <span className="sr-only">CreatorBox</span>
     </span>
   );
 }
