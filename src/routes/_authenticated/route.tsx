@@ -90,7 +90,7 @@ function AppLayout() {
           <Button variant="outline" size="sm" onClick={() => setAberto(true)}>
             Menu
           </Button>
-          <img src="/logo.png" alt="CreatorBox" className="h-6 w-6" />
+          <Logo size="xs" />
         </header>
         <main className="min-w-0 flex-1">
           <Outlet />
@@ -120,7 +120,7 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
     <div className="flex h-full flex-col">
       <div className="px-5 py-6">
         <Link to="/dashboard" onClick={onNavigate} className="flex items-center gap-2">
-          <img src="/logo.png" alt="CreatorBox" className="h-7 w-7" />
+          <Logo size="sm" />
         </Link>
       </div>
 
