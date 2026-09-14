@@ -235,7 +235,8 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
         </div>
       </ScrollArea>
 
-      <div className="border-t border-sidebar-border p-3">
+      <div className="space-y-1 border-t border-sidebar-border p-3">
+        <NavItem to="/conta" icon={UserCog} label="Minha conta" onNavigate={onNavigate} />
         <Button variant="ghost" size="sm" className="w-full justify-start" onClick={sair}>
           <LogOut className="size-4" />
           Sair
