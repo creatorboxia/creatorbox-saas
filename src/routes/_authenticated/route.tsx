@@ -17,6 +17,7 @@ import {
   LogOut,
   Plus,
   Sparkles,
+  UserCog,
   Users,
 } from "lucide-react";
 import { useState } from "react";
@@ -255,6 +256,7 @@ function NavItem({
   to:
     | "/dashboard"
     | "/chat"
+    | "/conta"
     | "/ferramentas/calendario"
     | "/ferramentas/ideias"
     | "/ferramentas/roteiros"
