@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { Logo, LogoMark } from "@/components/logo";
+import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/external/client";
