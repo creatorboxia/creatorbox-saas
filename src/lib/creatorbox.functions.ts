@@ -54,17 +54,51 @@ function unwrap<T>(result: { data: T | null; error: { message: string } | null }
 
 /* ---------------------------------- perfil --------------------------------- */
 
+export type Perfil = {
+  id: string;
+  nome: string | null;
+  email: string | null;
+  plano: string;
+  status_assinatura: string;
+  avatar_url?: string | null;
+};
+
 export const getPerfil = createServerFn({ method: "GET" })
   .middleware([requireExternalAuth])
-  .handler(async ({ context }) =>
-    unwrap(
-      await context.supabase
-        .from("profiles")
-        .select("id, nome, email, plano, status_assinatura")
-        .eq("id", context.userId)
-        .maybeSingle(),
-    ),
-  );
+  .handler(async ({ context }): Promise<Perfil | null> => {
+    const { data, error } = await (context.supabase as SupabaseClient)
+      .from("profiles")
+      .select("*")
+      .eq("id", context.userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return (data as Perfil | null) ?? null;
+  });
+
+export const updatePerfil = createServerFn({ method: "POST" })
+  .middleware([requireExternalAuth])
+  .inputValidator((data: { nome?: string | null; avatar_url?: string | null }) =>
+    z
+      .object({
+        nome: z.string().max(120).nullable().optional(),
+        avatar_url: z.string().url().nullable().optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }): Promise<Perfil> => {
+    const payload: Record<string, unknown> = {};
+    if (data.nome !== undefined) payload["nome"] = data.nome?.trim() || null;
+    if (data.avatar_url !== undefined) payload["avatar_url"] = data.avatar_url;
+
+    const { data: perfil, error } = await (context.supabase as SupabaseClient)
+      .from("profiles")
+      .update(payload)
+      .eq("id", context.userId)
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    return perfil as Perfil;
+  });
 
 /* --------------------------------- clientes -------------------------------- */
 
