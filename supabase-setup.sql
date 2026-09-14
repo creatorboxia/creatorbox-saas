@@ -168,3 +168,31 @@ DROP POLICY IF EXISTS "uso_ia_select_own" ON public.uso_ia;
 CREATE POLICY "uso_ia_select_own" ON public.uso_ia FOR SELECT TO authenticated USING (auth.uid() = user_id);
 DROP POLICY IF EXISTS "uso_ia_insert_own" ON public.uso_ia;
 CREATE POLICY "uso_ia_insert_own" ON public.uso_ia FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+
+-- ============================================================
+-- perfil: foto de avatar + bucket "avatars"
+-- ============================================================
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('avatars', 'avatars', true)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "avatars_public_read" ON storage.objects;
+CREATE POLICY "avatars_public_read" ON storage.objects
+  FOR SELECT USING (bucket_id = 'avatars');
+
+DROP POLICY IF EXISTS "avatars_insert_own" ON storage.objects;
+CREATE POLICY "avatars_insert_own" ON storage.objects
+  FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
+
+DROP POLICY IF EXISTS "avatars_update_own" ON storage.objects;
+CREATE POLICY "avatars_update_own" ON storage.objects
+  FOR UPDATE TO authenticated
+  USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
+
+DROP POLICY IF EXISTS "avatars_delete_own" ON storage.objects;
+CREATE POLICY "avatars_delete_own" ON storage.objects
+  FOR DELETE TO authenticated
+  USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);

@@ -33,10 +33,10 @@ function Dashboard() {
   });
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    <div className="mx-auto max-w-5xl px-6 py-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold">Painel</h1>
+          <h1 className="text-2xl font-semibold">Painel</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             O retrato do seu portfólio de clientes hoje.
           </p>

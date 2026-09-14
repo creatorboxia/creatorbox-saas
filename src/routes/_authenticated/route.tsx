@@ -17,11 +17,12 @@ import {
   LogOut,
   Plus,
   Sparkles,
+  UserCog,
   Users,
 } from "lucide-react";
 import { useState } from "react";
 
-import { Logo, LogoMark } from "@/components/logo";
+import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/external/client";
@@ -89,7 +90,7 @@ function AppLayout() {
           <Button variant="outline" size="sm" onClick={() => setAberto(true)}>
             Menu
           </Button>
-          <img src="/logo.png" alt="CreatorBox" className="h-6 w-6" />
+          <Logo size="xs" />
         </header>
         <main className="min-w-0 flex-1">
           <Outlet />
@@ -119,7 +120,7 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
     <div className="flex h-full flex-col">
       <div className="px-5 py-6">
         <Link to="/dashboard" onClick={onNavigate} className="flex items-center gap-2">
-          <img src="/logo.png" alt="CreatorBox" className="h-7 w-7" />
+          <Logo size="sm" />
         </Link>
       </div>
 
@@ -235,7 +236,8 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
         </div>
       </ScrollArea>
 
-      <div className="border-t border-sidebar-border p-3">
+      <div className="space-y-1 border-t border-sidebar-border p-3">
+        <NavItem to="/conta" icon={UserCog} label="Minha conta" onNavigate={onNavigate} />
         <Button variant="ghost" size="sm" className="w-full justify-start" onClick={sair}>
           <LogOut className="size-4" />
           Sair
@@ -254,6 +256,7 @@ function NavItem({
   to:
     | "/dashboard"
     | "/chat"
+    | "/conta"
     | "/ferramentas/calendario"
     | "/ferramentas/ideias"
     | "/ferramentas/roteiros"
