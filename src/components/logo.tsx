@@ -21,11 +21,11 @@ export function LogoMark({
 }) {
   return (
     <img
-      src="/logo.png"
+      src="/logo-mark.png"
       alt=""
       aria-hidden
-      width={500}
-      height={500}
+      width={129}
+      height={127}
       className={`block shrink-0 object-contain ${tamanhos[size]} ${className}`}
     />
   );
