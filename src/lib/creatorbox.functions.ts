@@ -61,7 +61,11 @@ export type Perfil = {
   plano: string;
   status_assinatura: string;
   avatar_url?: string | null;
+  saldo_creditos?: number | null;
 };
+
+// Custo fixo por mensagem enviada ao assistente. Ajustável em um único lugar.
+export const CUSTO_CREDITOS_MENSAGEM = 10;
 
 export const getPerfil = createServerFn({ method: "GET" })
   .middleware([requireExternalAuth])
@@ -375,6 +379,20 @@ export const sendMensagem = createServerFn({ method: "POST" })
 
     const contexto = await montarContextoCliente(context.supabase, conversa.cliente_id);
 
+    // Saldo de créditos: lido com client privilegiado para não depender do client do usuário.
+    const { externalSupabaseAdmin } = await import("@/integrations/external/client.server");
+    const { data: perfilSaldo, error: erroSaldo } = await externalSupabaseAdmin
+      .from("profiles")
+      .select("saldo_creditos")
+      .eq("id", context.userId)
+      .maybeSingle();
+    if (erroSaldo) throw new Error(erroSaldo.message);
+
+    const saldo = Number((perfilSaldo as { saldo_creditos?: number } | null)?.saldo_creditos ?? 0);
+    if (saldo < CUSTO_CREDITOS_MENSAGEM) {
+      throw new Error("Créditos insuficientes. Compre mais créditos para continuar.");
+    }
+
     const apiKey = process.env["OPENAI_API_KEY"];
 
     if (!apiKey) {
@@ -434,7 +452,6 @@ export const sendMensagem = createServerFn({ method: "POST" })
 
     // Registro de uso com client privilegiado (service role): impede que o usuário
     // forje seus próprios dados de consumo. Se a tabela não existir, não interrompe o chat.
-    const { externalSupabaseAdmin } = await import("@/integrations/external/client.server");
     await externalSupabaseAdmin
       .from("uso_ia")
       .insert({
@@ -445,5 +462,116 @@ export const sendMensagem = createServerFn({ method: "POST" })
       })
       .then(() => undefined, () => undefined);
 
-    return { ok: true, resposta };
+    // Desconto dos créditos e registro da transação (service role).
+    const { error: erroDebito } = await externalSupabaseAdmin.rpc("incrementar_creditos", {
+      p_user_id: context.userId,
+      p_quantidade: -CUSTO_CREDITOS_MENSAGEM,
+    });
+    if (erroDebito) console.error("[Creditos] Falha ao debitar:", erroDebito.message);
+
+    await externalSupabaseAdmin
+      .from("transacoes")
+      .insert({
+        user_id: context.userId,
+        tipo: "usage",
+        quantidade: -CUSTO_CREDITOS_MENSAGEM,
+        descricao: "Mensagem do assistente de IA",
+      })
+      .then(() => undefined, () => undefined);
+
+    return { ok: true, resposta, creditosRestantes: saldo - CUSTO_CREDITOS_MENSAGEM };
+  });
+
+/* --------------------------------- créditos -------------------------------- */
+
+export type ProdutoCredito = {
+  id: string;
+  codigo: string;
+  nome: string;
+  descricao: string | null;
+  creditos: number;
+  preco: number;
+  ativo: boolean;
+};
+
+export const listProdutosCreditos = createServerFn({ method: "GET" })
+  .middleware([requireExternalAuth])
+  .handler(async (): Promise<ProdutoCredito[]> => {
+    const { externalSupabaseAdmin } = await import("@/integrations/external/client.server");
+    const { data, error } = await externalSupabaseAdmin
+      .from("produtos_creditos")
+      .select("*")
+      .eq("ativo", true)
+      .order("creditos", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as unknown as ProdutoCredito[];
+  });
+
+export const criarCheckout = createServerFn({ method: "POST" })
+  .middleware([requireExternalAuth])
+  .inputValidator((data: { produtoId: string }) =>
+    z.object({ produtoId: z.string().uuid() }).parse(data),
+  )
+  .handler(async ({ data, context }): Promise<{ url: string }> => {
+    const accessToken = process.env["MERCADOPAGO_ACCESS_TOKEN"];
+    if (!accessToken) {
+      throw new Error("O pagamento ainda não está configurado. Tente novamente mais tarde.");
+    }
+    const appUrl = (process.env["APP_URL"] ?? "").replace(/\/$/, "");
+
+    const { externalSupabaseAdmin } = await import("@/integrations/external/client.server");
+    const { data: produto, error } = await externalSupabaseAdmin
+      .from("produtos_creditos")
+      .select("*")
+      .eq("id", data.produtoId)
+      .eq("ativo", true)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!produto) throw new Error("Pacote de créditos não encontrado.");
+
+    const p = produto as unknown as ProdutoCredito;
+
+    const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        items: [
+          {
+            id: p.id,
+            title: p.nome,
+            description: p.descricao ?? `${p.creditos} créditos CreatorBox`,
+            quantity: 1,
+            currency_id: "BRL",
+            unit_price: Number(p.preco),
+          },
+        ],
+        external_reference: `${context.userId}:${p.id}`,
+        metadata: { user_id: context.userId, produto_id: p.id },
+        ...(appUrl
+          ? {
+              back_urls: {
+                success: `${appUrl}/creditos`,
+                pending: `${appUrl}/creditos`,
+                failure: `${appUrl}/creditos`,
+              },
+              auto_return: "approved",
+              notification_url: `${appUrl}/api/webhooks/mercadopago`,
+            }
+          : {}),
+      }),
+    });
+
+    if (!response.ok) {
+      const detalhe = await response.text();
+      console.error("[MercadoPago] Falha ao criar preferência:", response.status, detalhe);
+      throw new Error("Não foi possível abrir o checkout agora. Tente novamente.");
+    }
+
+    const preference = (await response.json()) as { init_point?: string; sandbox_init_point?: string };
+    const url = preference.init_point ?? preference.sandbox_init_point;
+    if (!url) throw new Error("O checkout não retornou um link de pagamento.");
+    return { url };
   });
