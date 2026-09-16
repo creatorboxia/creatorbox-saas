@@ -432,8 +432,10 @@ export const sendMensagem = createServerFn({ method: "POST" })
         .single(),
     );
 
-    // Registro de uso; se a tabela ainda não existir no banco, não interrompe o chat.
-    await (context.supabase as SupabaseClient)
+    // Registro de uso com client privilegiado (service role): impede que o usuário
+    // forje seus próprios dados de consumo. Se a tabela não existir, não interrompe o chat.
+    const { externalSupabaseAdmin } = await import("@/integrations/external/client.server");
+    await externalSupabaseAdmin
       .from("uso_ia")
       .insert({
         user_id: context.userId,
