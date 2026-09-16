@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedContaRouteImport } from './routes/_authenticated/conta'
+import { Route as AuthenticatedCreditosRouteImport } from './routes/_authenticated/creditos'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedClientesClienteIdRouteRouteImport } from './routes/_authenticated/clientes/$clienteId/route'
@@ -23,6 +24,7 @@ import { Route as AuthenticatedFerramentasCalendarioRouteImport } from './routes
 import { Route as AuthenticatedFerramentasConteudosRouteImport } from './routes/_authenticated/ferramentas/conteudos'
 import { Route as AuthenticatedFerramentasIdeiasRouteImport } from './routes/_authenticated/ferramentas/ideias'
 import { Route as AuthenticatedFerramentasRoteirosRouteImport } from './routes/_authenticated/ferramentas/roteiros'
+import { Route as ApiWebhooksMercadopagoRouteImport } from './routes/api/webhooks/mercadopago'
 import { Route as AuthenticatedClientesClienteIdIndexRouteImport } from './routes/_authenticated/clientes/$clienteId/index'
 import { Route as AuthenticatedClientesClienteIdCalendarioRouteImport } from './routes/_authenticated/clientes/$clienteId/calendario'
 import { Route as AuthenticatedClientesClienteIdConteudosRouteImport } from './routes/_authenticated/clientes/$clienteId/conteudos'
@@ -56,6 +58,11 @@ const AuthenticatedChatRoute = AuthenticatedChatRouteImport.update({
 const AuthenticatedContaRoute = AuthenticatedContaRouteImport.update({
   id: '/conta',
   path: '/conta',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCreditosRoute = AuthenticatedCreditosRouteImport.update({
+  id: '/creditos',
+  path: '/creditos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -104,6 +111,11 @@ const AuthenticatedFerramentasRoteirosRoute =
     path: '/ferramentas/roteiros',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiWebhooksMercadopagoRoute = ApiWebhooksMercadopagoRouteImport.update({
+  id: '/api/webhooks/mercadopago',
+  path: '/api/webhooks/mercadopago',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedClientesClienteIdIndexRoute =
   AuthenticatedClientesClienteIdIndexRouteImport.update({
     id: '/',
@@ -141,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/chat': typeof AuthenticatedChatRoute
   '/conta': typeof AuthenticatedContaRoute
+  '/creditos': typeof AuthenticatedCreditosRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/api/chat': typeof ApiChatRoute
   '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
@@ -149,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/ferramentas/conteudos': typeof AuthenticatedFerramentasConteudosRoute
   '/ferramentas/ideias': typeof AuthenticatedFerramentasIdeiasRoute
   '/ferramentas/roteiros': typeof AuthenticatedFerramentasRoteirosRoute
+  '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
   '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
@@ -161,6 +175,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/chat': typeof AuthenticatedChatRoute
   '/conta': typeof AuthenticatedContaRoute
+  '/creditos': typeof AuthenticatedCreditosRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/api/chat': typeof ApiChatRoute
   '/clientes/novo': typeof AuthenticatedClientesNovoRoute
@@ -168,6 +183,7 @@ export interface FileRoutesByTo {
   '/ferramentas/conteudos': typeof AuthenticatedFerramentasConteudosRoute
   '/ferramentas/ideias': typeof AuthenticatedFerramentasIdeiasRoute
   '/ferramentas/roteiros': typeof AuthenticatedFerramentasRoteirosRoute
+  '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
   '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
@@ -182,6 +198,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
   '/_authenticated/conta': typeof AuthenticatedContaRoute
+  '/_authenticated/creditos': typeof AuthenticatedCreditosRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/api/chat': typeof ApiChatRoute
   '/_authenticated/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
@@ -190,6 +207,7 @@ export interface FileRoutesById {
   '/_authenticated/ferramentas/conteudos': typeof AuthenticatedFerramentasConteudosRoute
   '/_authenticated/ferramentas/ideias': typeof AuthenticatedFerramentasIdeiasRoute
   '/_authenticated/ferramentas/roteiros': typeof AuthenticatedFerramentasRoteirosRoute
+  '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
   '/_authenticated/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/_authenticated/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/_authenticated/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
@@ -204,6 +222,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/chat'
     | '/conta'
+    | '/creditos'
     | '/dashboard'
     | '/api/chat'
     | '/clientes/$clienteId'
@@ -212,6 +231,7 @@ export interface FileRouteTypes {
     | '/ferramentas/conteudos'
     | '/ferramentas/ideias'
     | '/ferramentas/roteiros'
+    | '/api/webhooks/mercadopago'
     | '/clientes/$clienteId/calendario'
     | '/clientes/$clienteId/conteudos'
     | '/clientes/$clienteId/estrategia'
@@ -224,6 +244,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/chat'
     | '/conta'
+    | '/creditos'
     | '/dashboard'
     | '/api/chat'
     | '/clientes/novo'
@@ -231,6 +252,7 @@ export interface FileRouteTypes {
     | '/ferramentas/conteudos'
     | '/ferramentas/ideias'
     | '/ferramentas/roteiros'
+    | '/api/webhooks/mercadopago'
     | '/clientes/$clienteId/calendario'
     | '/clientes/$clienteId/conteudos'
     | '/clientes/$clienteId/estrategia'
@@ -244,6 +266,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/chat'
     | '/_authenticated/conta'
+    | '/_authenticated/creditos'
     | '/_authenticated/dashboard'
     | '/api/chat'
     | '/_authenticated/clientes/$clienteId'
@@ -252,6 +275,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ferramentas/conteudos'
     | '/_authenticated/ferramentas/ideias'
     | '/_authenticated/ferramentas/roteiros'
+    | '/api/webhooks/mercadopago'
     | '/_authenticated/clientes/$clienteId/calendario'
     | '/_authenticated/clientes/$clienteId/conteudos'
     | '/_authenticated/clientes/$clienteId/estrategia'
@@ -265,6 +289,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiWebhooksMercadopagoRoute: typeof ApiWebhooksMercadopagoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -309,6 +334,13 @@ declare module '@tanstack/react-router' {
       path: '/conta'
       fullPath: '/conta'
       preLoaderRoute: typeof AuthenticatedContaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/creditos': {
+      id: '/_authenticated/creditos'
+      path: '/creditos'
+      fullPath: '/creditos'
+      preLoaderRoute: typeof AuthenticatedCreditosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -366,6 +398,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/ferramentas/roteiros'
       preLoaderRoute: typeof AuthenticatedFerramentasRoteirosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/webhooks/mercadopago': {
+      id: '/api/webhooks/mercadopago'
+      path: '/api/webhooks/mercadopago'
+      fullPath: '/api/webhooks/mercadopago'
+      preLoaderRoute: typeof ApiWebhooksMercadopagoRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/clientes/$clienteId/': {
       id: '/_authenticated/clientes/$clienteId/'
@@ -435,6 +474,7 @@ const AuthenticatedClientesClienteIdRouteRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
   AuthenticatedContaRoute: typeof AuthenticatedContaRoute
+  AuthenticatedCreditosRoute: typeof AuthenticatedCreditosRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedClientesClienteIdRouteRoute: typeof AuthenticatedClientesClienteIdRouteRouteWithChildren
   AuthenticatedClientesNovoRoute: typeof AuthenticatedClientesNovoRoute
@@ -447,6 +487,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedChatRoute: AuthenticatedChatRoute,
   AuthenticatedContaRoute: AuthenticatedContaRoute,
+  AuthenticatedCreditosRoute: AuthenticatedCreditosRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedClientesClienteIdRouteRoute:
     AuthenticatedClientesClienteIdRouteRouteWithChildren,
@@ -468,6 +509,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiWebhooksMercadopagoRoute: ApiWebhooksMercadopagoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
