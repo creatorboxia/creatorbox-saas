@@ -412,7 +412,7 @@ export const sendMensagem = createServerFn({ method: "POST" })
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-5.4-mini",
         messages: [
           { role: "system", content: system },
           ...historico.slice(-20).map((m) => ({
@@ -474,7 +474,7 @@ export const sendMensagem = createServerFn({ method: "POST" })
       .insert({
         user_id: context.userId,
         tipo: "usage",
-        quantidade: -CUSTO_CREDITOS_MENSAGEM,
+        quantidade_creditos: -CUSTO_CREDITOS_MENSAGEM,
         descricao: "Mensagem do assistente de IA",
       })
       .then(() => undefined, () => undefined);
@@ -486,11 +486,9 @@ export const sendMensagem = createServerFn({ method: "POST" })
 
 export type ProdutoCredito = {
   id: string;
-  codigo: string;
   nome: string;
-  descricao: string | null;
-  creditos: number;
   preco: number;
+  quantidade_creditos: number;
   ativo: boolean;
 };
 
@@ -502,7 +500,7 @@ export const listProdutosCreditos = createServerFn({ method: "GET" })
       .from("produtos_creditos")
       .select("*")
       .eq("ativo", true)
-      .order("creditos", { ascending: true });
+      .order("quantidade_creditos", { ascending: true });
     if (error) throw new Error(error.message);
     return (data ?? []) as unknown as ProdutoCredito[];
   });
@@ -510,7 +508,7 @@ export const listProdutosCreditos = createServerFn({ method: "GET" })
 export const criarCheckout = createServerFn({ method: "POST" })
   .middleware([requireExternalAuth])
   .inputValidator((data: { produtoId: string }) =>
-    z.object({ produtoId: z.string().uuid() }).parse(data),
+    z.object({ produtoId: z.string().min(1) }).parse(data),
   )
   .handler(async ({ data, context }): Promise<{ url: string }> => {
     const accessToken = process.env["MERCADOPAGO_ACCESS_TOKEN"];
@@ -542,7 +540,7 @@ export const criarCheckout = createServerFn({ method: "POST" })
           {
             id: p.id,
             title: p.nome,
-            description: p.descricao ?? `${p.creditos} créditos CreatorBox`,
+            description: `${p.quantidade_creditos} créditos CreatorBox`,
             quantity: 1,
             currency_id: "BRL",
             unit_price: Number(p.preco),
