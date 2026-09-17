@@ -93,7 +93,7 @@ export const Route = createFileRoute("/api/webhooks/mercadopago")({
 
         const { data: produto, error: erroProduto } = await externalSupabaseAdmin
           .from("produtos_creditos")
-          .select("id, creditos, nome")
+          .select("id, quantidade_creditos, nome")
           .eq("id", produtoId)
           .maybeSingle();
         if (erroProduto || !produto) {
@@ -101,14 +101,14 @@ export const Route = createFileRoute("/api/webhooks/mercadopago")({
           return new Response("product not found", { status: 200 });
         }
 
-        const creditos = Number((produto as { creditos: number }).creditos);
+        const creditos = Number((produto as { quantidade_creditos: number }).quantidade_creditos);
         const paymentId = String(pagamento.id);
 
         // A unique constraint em transacoes.payment_id impede processar o mesmo pagamento duas vezes.
         const { error: erroTransacao } = await externalSupabaseAdmin.from("transacoes").insert({
           user_id: userId,
           tipo: "purchase",
-          quantidade: creditos,
+          quantidade_creditos: creditos,
           payment_id: paymentId,
           descricao: `Compra de créditos — ${(produto as { nome: string }).nome}`,
           valor: pagamento.transaction_amount ?? null,
