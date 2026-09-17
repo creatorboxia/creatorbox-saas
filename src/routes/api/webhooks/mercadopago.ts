@@ -116,7 +116,7 @@ export const Route = createFileRoute("/api/webhooks/mercadopago")({
 
         if (erroTransacao) {
           // Duplicidade: já creditado em uma notificação anterior.
-          if (erroTransacao.code === "23505" || erroTransacao.code === "23505") {
+          if (erroTransacao.code === "23505") {
             return new Response("duplicate", { status: 200 });
           }
           if (erroTransacao.message.toLowerCase().includes("duplicate")) {
