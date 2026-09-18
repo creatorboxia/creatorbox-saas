@@ -10,8 +10,13 @@ import {
 } from "@/integrations/external/config";
 
 // Endpoint de chat com IA: valida o JWT do usuário no Supabase externo,
-// checa ownership do cliente/conversa, gera a resposta com IA e salva
-// as mensagens e o consumo de tokens em uso_ia.
+// checa ownership do cliente/conversa, verifica e desconta créditos,
+// gera a resposta com IA e salva as mensagens, o consumo de tokens e a
+// transação de uso.
+
+// Custo fixo por mensagem enviada ao assistente. Mesmo valor usado em
+// creatorbox.functions.ts — ajustar nos dois lugares se mudar.
+const CUSTO_CREDITOS_MENSAGEM = 10;
 
 const bodySchema = z.object({
   conversaId: z.string().uuid().nullable().optional(),
@@ -63,7 +68,34 @@ export const Route = createFileRoute("/api/chat")({
           }
           const { conversaId, clienteId, mensagem } = parsed.data;
 
-          // 3. Checa ownership do cliente (quando informado) e monta o contexto
+          // Client privilegiado (service role): usado só para as operações
+          // que não podem depender do client do próprio usuário — saldo de
+          // créditos, registro de uso e transações. Nunca usado para ler
+          // dados de negócio do usuário (isso continua no client acima,
+          // que respeita RLS).
+          const { externalSupabaseAdmin } = await import(
+            "@/integrations/external/client.server"
+          );
+
+          // 3. Verifica saldo de créditos ANTES de gastar tokens com a IA
+          const { data: perfil, error: perfilError } = await externalSupabaseAdmin
+            .from("profiles")
+            .select("saldo_creditos")
+            .eq("id", userId)
+            .maybeSingle();
+          if (perfilError) return json({ error: perfilError.message }, 500);
+
+          const saldoAtual = Number(
+            (perfil as { saldo_creditos?: number } | null)?.saldo_creditos ?? 0,
+          );
+          if (saldoAtual < CUSTO_CREDITOS_MENSAGEM) {
+            return json(
+              { error: "Créditos insuficientes. Compre mais créditos para continuar." },
+              402,
+            );
+          }
+
+          // 4. Checa ownership do cliente (quando informado) e monta o contexto
           let contexto = "";
           if (clienteId) {
             const { data: cliente, error: clienteError } = await supabase
@@ -100,7 +132,7 @@ export const Route = createFileRoute("/api/chat")({
               .join("\n");
           }
 
-          // 4. Busca (ou cria) a conversa, garantindo ownership
+          // 5. Busca (ou cria) a conversa, garantindo ownership
           let conversaIdFinal = conversaId ?? null;
           if (conversaIdFinal) {
             const { data: conversa } = await supabase
@@ -126,7 +158,7 @@ export const Route = createFileRoute("/api/chat")({
             conversaIdFinal = nova.id;
           }
 
-          // 5. Salva a mensagem do usuário
+          // 6. Salva a mensagem do usuário
           const { error: msgError } = await supabase.from("mensagens").insert({
             conversa_id: conversaIdFinal,
             role: "user",
@@ -134,14 +166,14 @@ export const Route = createFileRoute("/api/chat")({
           });
           if (msgError) return json({ error: msgError.message }, 500);
 
-          // 6. Histórico para contexto da IA
+          // 7. Histórico para contexto da IA
           const { data: historico } = await supabase
             .from("mensagens")
             .select("role, conteudo")
             .eq("conversa_id", conversaIdFinal)
             .order("created_at", { ascending: true });
 
-          // 7. Gera a resposta com IA (OpenAI própria do usuário)
+          // 8. Gera a resposta com IA (OpenAI própria do usuário)
           const apiKey = process.env["OPENAI_API_KEY"];
           if (!apiKey) {
             return json({ error: "A inteligência artificial não está configurada." }, 500);
@@ -162,7 +194,7 @@ export const Route = createFileRoute("/api/chat")({
                 Authorization: `Bearer ${apiKey}`,
               },
               body: JSON.stringify({
-                model: "gpt-4o-mini",
+                model: "gpt-5.4-mini",
                 messages: [
                   { role: "system", content: system },
                   ...(historico ?? []).slice(-20).map((m) => ({
@@ -201,16 +233,17 @@ export const Route = createFileRoute("/api/chat")({
             payload.choices?.[0]?.message?.content?.trim() ||
             "Não consegui gerar uma resposta agora. Tente reformular sua pergunta.";
 
-          // 8. Salva a resposta do assistente
+          // 9. Salva a resposta do assistente
           await supabase.from("mensagens").insert({
             conversa_id: conversaIdFinal,
             role: "assistant",
             conteudo: resposta,
           });
 
-          // 9. Registra o consumo de tokens (não interrompe o chat se a tabela não existir)
-          // uso_ia ainda não consta nos tipos gerados do Supabase externo.
-          await (supabase as unknown as import("@supabase/supabase-js").SupabaseClient)
+          // 10. Registra o consumo de tokens (client privilegiado — nunca o
+          // do usuário, para impedir que ele forje seus próprios dados de
+          // consumo). Não interrompe o chat se falhar.
+          await externalSupabaseAdmin
             .from("uso_ia")
             .insert({
               user_id: userId,
@@ -220,7 +253,31 @@ export const Route = createFileRoute("/api/chat")({
             })
             .then(() => undefined, () => undefined);
 
-          return json({ conversaId: conversaIdFinal, resposta });
+          // 11. Desconta os créditos e registra a transação de uso
+          // (client privilegiado, mesma lógica usada no restante do app).
+          const { error: erroDebito } = await externalSupabaseAdmin.rpc(
+            "incrementar_creditos",
+            { p_user_id: userId, p_quantidade: -CUSTO_CREDITOS_MENSAGEM },
+          );
+          if (erroDebito) {
+            console.error("[Creditos] Falha ao debitar:", erroDebito.message);
+          }
+
+          await externalSupabaseAdmin
+            .from("transacoes")
+            .insert({
+              user_id: userId,
+              tipo: "usage",
+              quantidade_creditos: -CUSTO_CREDITOS_MENSAGEM,
+              descricao: "Mensagem do assistente de IA",
+            })
+            .then(() => undefined, () => undefined);
+
+          return json({
+            conversaId: conversaIdFinal,
+            resposta,
+            creditosRestantes: saldoAtual - CUSTO_CREDITOS_MENSAGEM,
+          });
         } catch (error) {
           return json({ error: (error as Error).message }, 500);
         }
