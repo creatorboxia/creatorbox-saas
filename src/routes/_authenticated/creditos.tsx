@@ -101,12 +101,9 @@ function Creditos() {
                 <h2 className="text-base font-semibold">{produto.nome}</h2>
               </div>
               <p className="mt-3 font-display text-3xl font-semibold">
-                {produto.creditos.toLocaleString("pt-BR")}
+                {produto.quantidade_creditos.toLocaleString("pt-BR")}
                 <span className="ml-1 text-sm font-normal text-muted-foreground">créditos</span>
               </p>
-              {produto.descricao && (
-                <p className="mt-2 text-sm text-muted-foreground">{produto.descricao}</p>
-              )}
               <p className="mt-4 text-sm text-muted-foreground">
                 {formatarPreco(Number(produto.preco))}
               </p>
