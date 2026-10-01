@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Build chat transcripts and composers from the installed AI Elements primitives so markdown, scrolling, and input behavior remain consistent.

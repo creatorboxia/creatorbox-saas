@@ -68,9 +68,9 @@ function AppLayout() {
   const [aberto, setAberto] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex h-screen overflow-hidden bg-background">
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-72 shrink-0 border-r border-sidebar-border bg-sidebar transition-transform lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 h-screen w-72 shrink-0 border-r border-sidebar-border bg-sidebar transition-transform lg:static lg:translate-x-0 ${
           aberto ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -85,14 +85,14 @@ function AppLayout() {
         />
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b border-border px-4 py-3 lg:hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 lg:hidden">
           <Button variant="outline" size="sm" onClick={() => setAberto(true)}>
             Menu
           </Button>
           <Logo size="xs" />
         </header>
-        <main className="min-w-0 flex-1">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <Outlet />
         </main>
       </div>

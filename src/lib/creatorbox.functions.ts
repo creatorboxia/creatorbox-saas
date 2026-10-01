@@ -412,7 +412,7 @@ export const sendMensagem = createServerFn({ method: "POST" })
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-5.4-mini",
+        model: "gpt-5.5",
         messages: [
           { role: "system", content: system },
           ...historico.slice(-20).map((m) => ({
