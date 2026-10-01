@@ -1,17 +1,26 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Loader2, Plus, Send } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/external/client";
 import {
-  createConversa,
-  listConversas,
-  listMensagens,
-} from "@/lib/creatorbox.functions";
+  Conversation,
+  ConversationContent,
+  ConversationEmptyState,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
+import {
+  PromptInput,
+  PromptInputFooter,
+  PromptInputSubmit,
+  PromptInputTextarea,
+} from "@/components/ai-elements/prompt-input";
+import { Shimmer } from "@/components/ai-elements/shimmer";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/external/client";
+import { createConversa, listConversas, listMensagens } from "@/lib/creatorbox.functions";
 
 // Envia a mensagem para o endpoint /api/chat, que valida o JWT,
 // checa o ownership do cliente, gera a resposta com IA e registra
@@ -72,7 +81,6 @@ function Chat() {
   const queryClient = useQueryClient();
   const [conversaId, setConversaId] = useState<string | null>(null);
   const [texto, setTexto] = useState("");
-  const fim = useRef<HTMLDivElement>(null);
 
   const { data: conversas } = useQuery({
     queryKey: ["conversas"],
@@ -91,19 +99,16 @@ function Chat() {
     enabled: Boolean(conversaId),
   });
 
-  useEffect(() => {
-    fim.current?.scrollIntoView({ behavior: "smooth" });
-  }, [mensagens]);
-
   const nova = useMutation({
     mutationFn: async () => (await createConversa({ data: {} })) as { id: string } | null,
     onSuccess: async (conversa) => {
       await queryClient.invalidateQueries({ queryKey: ["conversas"] });
       if (conversa) setConversaId(conversa.id);
     },
-    onError: (error: Error) => toast.error("Não foi possível criar a conversa", {
-      description: error.message,
-    }),
+    onError: (error: Error) =>
+      toast.error("Não foi possível criar a conversa", {
+        description: error.message,
+      }),
   });
 
   const enviar = useMutation({
@@ -127,8 +132,8 @@ function Chat() {
   });
 
   return (
-    <div className="flex h-full min-h-screen">
-      <div className="hidden w-64 shrink-0 border-r border-border px-3 py-6 xl:block">
+    <div className="flex h-full min-h-0 overflow-hidden">
+      <div className="hidden h-full w-64 shrink-0 overflow-y-auto border-r border-border px-3 py-6 xl:block">
         <Button
           variant="outline"
           size="sm"
@@ -156,72 +161,82 @@ function Chat() {
         </div>
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <div className="border-b border-border px-6 py-4">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0 border-b border-border px-4 py-4 sm:px-6">
           <h1 className="text-lg font-semibold">Chat de ideias</h1>
           <p className="text-xs text-muted-foreground">
             Peça pautas, roteiros e legendas — o assistente usa as informações do cliente.
           </p>
         </div>
 
-        <div className="flex-1 space-y-4 overflow-y-auto px-6 py-6">
-          {(mensagens ?? []).length === 0 && (
-            <p className="mx-auto max-w-md pt-16 text-center text-sm text-muted-foreground">
-              Comece perguntando algo como “me dá 5 ideias de reels para uma clínica de estética”.
-            </p>
-          )}
-          {(mensagens ?? []).map((mensagem) => (
-            <div
-              key={mensagem.id}
-              className={`flex ${mensagem.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-2xl rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap ${
-                  mensagem.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "border border-border bg-card"
-                }`}
-              >
-                {mensagem.conteudo}
-              </div>
-            </div>
-          ))}
-          {enviar.isPending && (
-            <div className="flex justify-start">
-              <div className="flex items-center gap-1.5 rounded-2xl border border-border bg-card px-4 py-3.5">
-                <span className="size-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
-                <span className="size-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
-                <span className="size-2 animate-bounce rounded-full bg-primary" />
-              </div>
-            </div>
-          )}
-          <div ref={fim} />
-        </div>
-
-        <form
-          className="flex items-end gap-2 border-t border-border px-6 py-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (texto.trim() === "") return;
-            enviar.mutate(texto.trim());
-          }}
-        >
-          <Textarea
-            value={texto}
-            rows={2}
-            placeholder="Escreva sua ideia ou pergunta..."
-            disabled={enviar.isPending}
-            onChange={(e) => setTexto(e.target.value)}
-            className="resize-none"
-          />
-          <Button type="submit" disabled={enviar.isPending || texto.trim() === ""}>
-            {enviar.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Send className="size-4" />
+        <Conversation className="min-h-0">
+          <ConversationContent className="mx-auto w-full max-w-3xl gap-5 px-4 py-6 sm:px-6">
+            {(mensagens ?? []).length === 0 && (
+              <ConversationEmptyState
+                className="min-h-72"
+                title="Comece uma nova ideia"
+                description="Experimente pedir 5 ideias de reels para uma clínica de estética."
+              />
             )}
-          </Button>
-        </form>
+            {(mensagens ?? []).map((mensagem) => (
+              <Message
+                key={mensagem.id}
+                from={mensagem.role === "user" ? "user" : "assistant"}
+                className="max-w-full"
+              >
+                <MessageContent
+                  className={
+                    mensagem.role === "user"
+                      ? "max-w-[85%] bg-primary text-primary-foreground sm:max-w-2xl"
+                      : "w-full max-w-2xl"
+                  }
+                >
+                  {mensagem.role === "assistant" ? (
+                    <MessageResponse className="text-sm leading-7 [&_a]:text-primary [&_a]:underline [&_blockquote]:border-l-primary [&_code]:rounded [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_h1]:font-display [&_h1]:text-xl [&_h2]:font-display [&_h2]:text-lg [&_h3]:font-display [&_h3]:text-base [&_li]:my-1 [&_pre]:border [&_pre]:border-border [&_pre]:bg-muted/70 [&_strong]:text-foreground">
+                      {mensagem.conteudo}
+                    </MessageResponse>
+                  ) : (
+                    <p className="whitespace-pre-wrap">{mensagem.conteudo}</p>
+                  )}
+                </MessageContent>
+              </Message>
+            ))}
+            {enviar.isPending && (
+              <Message from="assistant">
+                <MessageContent>
+                  <Shimmer className="text-sm">Criando sua resposta...</Shimmer>
+                </MessageContent>
+              </Message>
+            )}
+          </ConversationContent>
+          <ConversationScrollButton aria-label="Ir para a mensagem mais recente" />
+        </Conversation>
+
+        <div className="shrink-0 border-t border-border bg-background px-4 py-3 sm:px-6 sm:py-4">
+          <PromptInput
+            className="mx-auto max-w-3xl"
+            onSubmit={({ text }) => {
+              const conteudo = text.trim();
+              if (conteudo === "" || enviar.isPending) return;
+              enviar.mutate(conteudo);
+            }}
+          >
+            <PromptInputTextarea
+              value={texto}
+              placeholder="Escreva sua ideia ou pergunta..."
+              disabled={enviar.isPending}
+              onChange={(event) => setTexto(event.currentTarget.value)}
+              className="min-h-20"
+            />
+            <PromptInputFooter className="justify-end">
+              <PromptInputSubmit
+                status={enviar.isPending ? "submitted" : "ready"}
+                disabled={enviar.isPending || texto.trim() === ""}
+                aria-label="Enviar mensagem"
+              />
+            </PromptInputFooter>
+          </PromptInput>
+        </div>
       </div>
     </div>
   );

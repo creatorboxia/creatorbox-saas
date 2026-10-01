@@ -86,9 +86,7 @@ function Creditos() {
           <Skeleton className="h-44 rounded-2xl" />
         </div>
       ) : (produtos ?? []).length === 0 ? (
-        <p className="mt-6 text-sm text-muted-foreground">
-          Nenhum pacote disponível no momento.
-        </p>
+        <p className="mt-6 text-sm text-muted-foreground">Nenhum pacote disponível no momento.</p>
       ) : (
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           {(produtos ?? []).map((produto: ProdutoCredito) => (
@@ -101,12 +99,9 @@ function Creditos() {
                 <h2 className="text-base font-semibold">{produto.nome}</h2>
               </div>
               <p className="mt-3 font-display text-3xl font-semibold">
-                {produto.creditos.toLocaleString("pt-BR")}
+                {produto.quantidade_creditos.toLocaleString("pt-BR")}
                 <span className="ml-1 text-sm font-normal text-muted-foreground">créditos</span>
               </p>
-              {produto.descricao && (
-                <p className="mt-2 text-sm text-muted-foreground">{produto.descricao}</p>
-              )}
               <p className="mt-4 text-sm text-muted-foreground">
                 {formatarPreco(Number(produto.preco))}
               </p>

@@ -14,8 +14,8 @@ function assinaturaValida(params: {
   let v1 = "";
   for (const parte of xSignature.split(",")) {
     const [chave, valor] = parte.split("=").map((s) => s?.trim() ?? "");
-    if (chave === "ts") ts = valor;
-    if (chave === "v1") v1 = valor;
+    if (chave === "ts" && valor) ts = valor;
+    if (chave === "v1" && valor) v1 = valor;
   }
   if (!ts || !v1) return false;
 
@@ -39,9 +39,11 @@ export const Route = createFileRoute("/api/webhooks/mercadopago")({
           return new Response("Not configured", { status: 500 });
         }
 
-        const corpo = (await request.json().catch(() => null)) as
-          | { type?: string; action?: string; data?: { id?: string | number } }
-          | null;
+        const corpo = (await request.json().catch(() => null)) as {
+          type?: string;
+          action?: string;
+          data?: { id?: string | number };
+        } | null;
         if (!corpo) return new Response("Invalid body", { status: 400 });
 
         const url = new URL(request.url);

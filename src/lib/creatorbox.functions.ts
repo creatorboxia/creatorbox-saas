@@ -110,10 +110,7 @@ export const listClientes = createServerFn({ method: "GET" })
   .middleware([requireExternalAuth])
   .handler(async ({ context }): Promise<Cliente[]> =>
     unwrap(
-      await context.supabase
-        .from("clientes")
-        .select("*")
-        .order("created_at", { ascending: false }),
+      await context.supabase.from("clientes").select("*").order("created_at", { ascending: false }),
     ),
   );
 
@@ -347,9 +344,7 @@ async function montarContextoCliente(
 export const sendMensagem = createServerFn({ method: "POST" })
   .middleware([requireExternalAuth])
   .inputValidator((data: { conversaId: string; conteudo: string }) =>
-    z
-      .object({ conversaId: z.string().uuid(), conteudo: z.string().min(1) })
-      .parse(data),
+    z.object({ conversaId: z.string().uuid(), conteudo: z.string().min(1) }).parse(data),
   )
   .handler(async ({ data, context }) => {
     const conversa = unwrap<{ id: string; cliente_id: string | null } | null>(
@@ -409,10 +404,10 @@ export const sendMensagem = createServerFn({ method: "POST" })
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-5.4-mini",
+        model: "gpt-5.5",
         messages: [
           { role: "system", content: system },
           ...historico.slice(-20).map((m) => ({
@@ -426,10 +421,14 @@ export const sendMensagem = createServerFn({ method: "POST" })
     if (!response.ok) {
       const detalhe = await response.text();
       if (response.status === 429) {
-        throw new Error("Muitas mensagens em pouco tempo. Aguarde alguns segundos e tente de novo.");
+        throw new Error(
+          "Muitas mensagens em pouco tempo. Aguarde alguns segundos e tente de novo.",
+        );
       }
       if (response.status === 402) {
-        throw new Error("Os créditos de inteligência artificial acabaram. Adicione créditos para continuar.");
+        throw new Error(
+          "Os créditos de inteligência artificial acabaram. Adicione créditos para continuar.",
+        );
       }
       throw new Error(`Falha na resposta da IA (${response.status}): ${detalhe.slice(0, 200)}`);
     }
@@ -460,7 +459,10 @@ export const sendMensagem = createServerFn({ method: "POST" })
         tokens_input: payload.usage?.prompt_tokens ?? 0,
         tokens_output: payload.usage?.completion_tokens ?? 0,
       })
-      .then(() => undefined, () => undefined);
+      .then(
+        () => undefined,
+        () => undefined,
+      );
 
     // Desconto dos créditos e registro da transação (service role).
     const { error: erroDebito } = await externalSupabaseAdmin.rpc("incrementar_creditos", {
@@ -477,7 +479,10 @@ export const sendMensagem = createServerFn({ method: "POST" })
         quantidade_creditos: -CUSTO_CREDITOS_MENSAGEM,
         descricao: "Mensagem do assistente de IA",
       })
-      .then(() => undefined, () => undefined);
+      .then(
+        () => undefined,
+        () => undefined,
+      );
 
     return { ok: true, resposta, creditosRestantes: saldo - CUSTO_CREDITOS_MENSAGEM };
   });
@@ -568,7 +573,10 @@ export const criarCheckout = createServerFn({ method: "POST" })
       throw new Error("Não foi possível abrir o checkout agora. Tente novamente.");
     }
 
-    const preference = (await response.json()) as { init_point?: string; sandbox_init_point?: string };
+    const preference = (await response.json()) as {
+      init_point?: string;
+      sandbox_init_point?: string;
+    };
     const url = preference.init_point ?? preference.sandbox_init_point;
     if (!url) throw new Error("O checkout não retornou um link de pagamento.");
     return { url };

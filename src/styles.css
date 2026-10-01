@@ -1,5 +1,6 @@
 @import "tailwindcss" source(none);
 @source "../src";
+@source "../node_modules/streamdown/dist/*.js";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -109,17 +110,17 @@
     color-scheme: dark;
   }
 
-  #lovable-badge{
+  #lovable-badge {
     display: none !important;
   }
-  
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
-  #lovable-badge{
+  #lovable-badge {
     display: none !important;
   }
   h1,
