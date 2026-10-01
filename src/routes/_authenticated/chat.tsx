@@ -10,11 +10,7 @@ import {
   ConversationEmptyState,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import {
   PromptInput,
   PromptInputFooter,
@@ -24,11 +20,7 @@ import {
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/external/client";
-import {
-  createConversa,
-  listConversas,
-  listMensagens,
-} from "@/lib/creatorbox.functions";
+import { createConversa, listConversas, listMensagens } from "@/lib/creatorbox.functions";
 
 // Envia a mensagem para o endpoint /api/chat, que valida o JWT,
 // checa o ownership do cliente, gera a resposta com IA e registra
@@ -113,9 +105,10 @@ function Chat() {
       await queryClient.invalidateQueries({ queryKey: ["conversas"] });
       if (conversa) setConversaId(conversa.id);
     },
-    onError: (error: Error) => toast.error("Não foi possível criar a conversa", {
-      description: error.message,
-    }),
+    onError: (error: Error) =>
+      toast.error("Não foi possível criar a conversa", {
+        description: error.message,
+      }),
   });
 
   const enviar = useMutation({
@@ -178,43 +171,43 @@ function Chat() {
 
         <Conversation className="min-h-0">
           <ConversationContent className="mx-auto w-full max-w-3xl gap-5 px-4 py-6 sm:px-6">
-          {(mensagens ?? []).length === 0 && (
-            <ConversationEmptyState
-              className="min-h-72"
-              title="Comece uma nova ideia"
-              description="Experimente pedir 5 ideias de reels para uma clínica de estética."
-            />
-          )}
-          {(mensagens ?? []).map((mensagem) => (
-            <Message
-              key={mensagem.id}
-              from={mensagem.role === "user" ? "user" : "assistant"}
-              className="max-w-full"
-            >
-              <MessageContent
-                className={
-                  mensagem.role === "user"
-                    ? "max-w-[85%] bg-primary text-primary-foreground sm:max-w-2xl"
-                    : "w-full max-w-2xl"
-                }
+            {(mensagens ?? []).length === 0 && (
+              <ConversationEmptyState
+                className="min-h-72"
+                title="Comece uma nova ideia"
+                description="Experimente pedir 5 ideias de reels para uma clínica de estética."
+              />
+            )}
+            {(mensagens ?? []).map((mensagem) => (
+              <Message
+                key={mensagem.id}
+                from={mensagem.role === "user" ? "user" : "assistant"}
+                className="max-w-full"
               >
-                {mensagem.role === "assistant" ? (
-                  <MessageResponse className="text-sm leading-7 [&_a]:text-primary [&_a]:underline [&_blockquote]:border-l-primary [&_code]:rounded [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_h1]:font-display [&_h1]:text-xl [&_h2]:font-display [&_h2]:text-lg [&_h3]:font-display [&_h3]:text-base [&_li]:my-1 [&_pre]:border [&_pre]:border-border [&_pre]:bg-muted/70 [&_strong]:text-foreground">
-                    {mensagem.conteudo}
-                  </MessageResponse>
-                ) : (
-                  <p className="whitespace-pre-wrap">{mensagem.conteudo}</p>
-                )}
-              </MessageContent>
-            </Message>
-          ))}
-          {enviar.isPending && (
-            <Message from="assistant">
-              <MessageContent>
-                <Shimmer className="text-sm">Criando sua resposta...</Shimmer>
-              </MessageContent>
-            </Message>
-          )}
+                <MessageContent
+                  className={
+                    mensagem.role === "user"
+                      ? "max-w-[85%] bg-primary text-primary-foreground sm:max-w-2xl"
+                      : "w-full max-w-2xl"
+                  }
+                >
+                  {mensagem.role === "assistant" ? (
+                    <MessageResponse className="text-sm leading-7 [&_a]:text-primary [&_a]:underline [&_blockquote]:border-l-primary [&_code]:rounded [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_h1]:font-display [&_h1]:text-xl [&_h2]:font-display [&_h2]:text-lg [&_h3]:font-display [&_h3]:text-base [&_li]:my-1 [&_pre]:border [&_pre]:border-border [&_pre]:bg-muted/70 [&_strong]:text-foreground">
+                      {mensagem.conteudo}
+                    </MessageResponse>
+                  ) : (
+                    <p className="whitespace-pre-wrap">{mensagem.conteudo}</p>
+                  )}
+                </MessageContent>
+              </Message>
+            ))}
+            {enviar.isPending && (
+              <Message from="assistant">
+                <MessageContent>
+                  <Shimmer className="text-sm">Criando sua resposta...</Shimmer>
+                </MessageContent>
+              </Message>
+            )}
           </ConversationContent>
           <ConversationScrollButton aria-label="Ir para a mensagem mais recente" />
         </Conversation>

@@ -86,9 +86,7 @@ function Creditos() {
           <Skeleton className="h-44 rounded-2xl" />
         </div>
       ) : (produtos ?? []).length === 0 ? (
-        <p className="mt-6 text-sm text-muted-foreground">
-          Nenhum pacote disponível no momento.
-        </p>
+        <p className="mt-6 text-sm text-muted-foreground">Nenhum pacote disponível no momento.</p>
       ) : (
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           {(produtos ?? []).map((produto: ProdutoCredito) => (

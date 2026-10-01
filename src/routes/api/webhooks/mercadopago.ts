@@ -39,9 +39,11 @@ export const Route = createFileRoute("/api/webhooks/mercadopago")({
           return new Response("Not configured", { status: 500 });
         }
 
-        const corpo = (await request.json().catch(() => null)) as
-          | { type?: string; action?: string; data?: { id?: string | number } }
-          | null;
+        const corpo = (await request.json().catch(() => null)) as {
+          type?: string;
+          action?: string;
+          data?: { id?: string | number };
+        } | null;
         if (!corpo) return new Response("Invalid body", { status: 400 });
 
         const url = new URL(request.url);

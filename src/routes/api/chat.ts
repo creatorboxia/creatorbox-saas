@@ -73,9 +73,7 @@ export const Route = createFileRoute("/api/chat")({
           // créditos, registro de uso e transações. Nunca usado para ler
           // dados de negócio do usuário (isso continua no client acima,
           // que respeita RLS).
-          const { externalSupabaseAdmin } = await import(
-            "@/integrations/external/client.server"
-          );
+          const { externalSupabaseAdmin } = await import("@/integrations/external/client.server");
 
           // 3. Verifica saldo de créditos ANTES de gastar tokens com a IA
           const { data: perfil, error: perfilError } = await externalSupabaseAdmin
@@ -185,26 +183,23 @@ export const Route = createFileRoute("/api/chat")({
             "legendas e CTAs. Seja direto e use listas quando ajudar." +
             (contexto ? `\n\nContexto do cliente atendido:\n${contexto}` : "");
 
-          const aiResponse = await fetch(
-            "https://api.openai.com/v1/chat/completions",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${apiKey}`,
-              },
-              body: JSON.stringify({
-                model: "gpt-5.5",
-                messages: [
-                  { role: "system", content: system },
-                  ...(historico ?? []).slice(-20).map((m) => ({
-                    role: m.role,
-                    content: m.conteudo,
-                  })),
-                ],
-              }),
+          const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${apiKey}`,
             },
-          );
+            body: JSON.stringify({
+              model: "gpt-5.5",
+              messages: [
+                { role: "system", content: system },
+                ...(historico ?? []).slice(-20).map((m) => ({
+                  role: m.role,
+                  content: m.conteudo,
+                })),
+              ],
+            }),
+          });
 
           if (!aiResponse.ok) {
             if (aiResponse.status === 429) {
@@ -217,10 +212,7 @@ export const Route = createFileRoute("/api/chat")({
               );
             }
             if (aiResponse.status === 401) {
-              return json(
-                { error: "A chave da OpenAI é inválida ou foi revogada." },
-                401,
-              );
+              return json({ error: "A chave da OpenAI é inválida ou foi revogada." }, 401);
             }
             return json({ error: `Falha na IA (${aiResponse.status})` }, 502);
           }
@@ -251,14 +243,17 @@ export const Route = createFileRoute("/api/chat")({
               tokens_input: payload.usage?.prompt_tokens ?? 0,
               tokens_output: payload.usage?.completion_tokens ?? 0,
             })
-            .then(() => undefined, () => undefined);
+            .then(
+              () => undefined,
+              () => undefined,
+            );
 
           // 11. Desconta os créditos e registra a transação de uso
           // (client privilegiado, mesma lógica usada no restante do app).
-          const { error: erroDebito } = await externalSupabaseAdmin.rpc(
-            "incrementar_creditos",
-            { p_user_id: userId, p_quantidade: -CUSTO_CREDITOS_MENSAGEM },
-          );
+          const { error: erroDebito } = await externalSupabaseAdmin.rpc("incrementar_creditos", {
+            p_user_id: userId,
+            p_quantidade: -CUSTO_CREDITOS_MENSAGEM,
+          });
           if (erroDebito) {
             console.error("[Creditos] Falha ao debitar:", erroDebito.message);
           }
@@ -271,7 +266,10 @@ export const Route = createFileRoute("/api/chat")({
               quantidade_creditos: -CUSTO_CREDITOS_MENSAGEM,
               descricao: "Mensagem do assistente de IA",
             })
-            .then(() => undefined, () => undefined);
+            .then(
+              () => undefined,
+              () => undefined,
+            );
 
           return json({
             conversaId: conversaIdFinal,

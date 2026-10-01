@@ -141,12 +141,7 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
           label="Calendário"
           onNavigate={onNavigate}
         />
-        <NavItem
-          to="/ferramentas/ideias"
-          icon={Lightbulb}
-          label="Ideias"
-          onNavigate={onNavigate}
-        />
+        <NavItem to="/ferramentas/ideias" icon={Lightbulb} label="Ideias" onNavigate={onNavigate} />
         <NavItem
           to="/ferramentas/roteiros"
           icon={Clapperboard}
@@ -197,7 +192,12 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
 
                 {ativo && (
                   <div className="mt-1 ml-6 space-y-0.5 border-l border-sidebar-border pl-3">
-                    <SubItem to="/clientes/$clienteId" id={cliente.id} label="Visão geral" onNavigate={onNavigate} />
+                    <SubItem
+                      to="/clientes/$clienteId"
+                      id={cliente.id}
+                      label="Visão geral"
+                      onNavigate={onNavigate}
+                    />
                     <SubItem
                       to="/clientes/$clienteId/estrategia"
                       id={cliente.id}
