@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedContaRouteImport } from './routes/_authenticated/conta'
@@ -24,12 +25,12 @@ import { Route as AuthenticatedFerramentasCalendarioRouteImport } from './routes
 import { Route as AuthenticatedFerramentasConteudosRouteImport } from './routes/_authenticated/ferramentas/conteudos'
 import { Route as AuthenticatedFerramentasIdeiasRouteImport } from './routes/_authenticated/ferramentas/ideias'
 import { Route as AuthenticatedFerramentasRoteirosRouteImport } from './routes/_authenticated/ferramentas/roteiros'
-import { Route as ApiWebhooksMercadopagoRouteImport } from './routes/api/webhooks/mercadopago'
 import { Route as AuthenticatedClientesClienteIdIndexRouteImport } from './routes/_authenticated/clientes/$clienteId/index'
 import { Route as AuthenticatedClientesClienteIdCalendarioRouteImport } from './routes/_authenticated/clientes/$clienteId/calendario'
 import { Route as AuthenticatedClientesClienteIdConteudosRouteImport } from './routes/_authenticated/clientes/$clienteId/conteudos'
 import { Route as AuthenticatedClientesClienteIdEstrategiaRouteImport } from './routes/_authenticated/clientes/$clienteId/estrategia'
 import { Route as AuthenticatedClientesClienteIdInformacoesRouteImport } from './routes/_authenticated/clientes/$clienteId/informacoes'
+import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -43,6 +44,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanosRoute = PlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -111,11 +117,6 @@ const AuthenticatedFerramentasRoteirosRoute =
     path: '/ferramentas/roteiros',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const ApiWebhooksMercadopagoRoute = ApiWebhooksMercadopagoRouteImport.update({
-  id: '/api/webhooks/mercadopago',
-  path: '/api/webhooks/mercadopago',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedClientesClienteIdIndexRoute =
   AuthenticatedClientesClienteIdIndexRouteImport.update({
     id: '/',
@@ -146,10 +147,16 @@ const AuthenticatedClientesClienteIdInformacoesRoute =
     path: '/informacoes',
     getParentRoute: () => AuthenticatedClientesClienteIdRouteRoute,
   } as any)
+const ApiPublicWebhooksStripeRoute = ApiPublicWebhooksStripeRouteImport.update({
+  id: '/api/public/webhooks/stripe',
+  path: '/api/public/webhooks/stripe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/planos': typeof PlanosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/chat': typeof AuthenticatedChatRoute
   '/conta': typeof AuthenticatedContaRoute
@@ -162,16 +169,17 @@ export interface FileRoutesByFullPath {
   '/ferramentas/conteudos': typeof AuthenticatedFerramentasConteudosRoute
   '/ferramentas/ideias': typeof AuthenticatedFerramentasIdeiasRoute
   '/ferramentas/roteiros': typeof AuthenticatedFerramentasRoteirosRoute
-  '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
   '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
   '/clientes/$clienteId/informacoes': typeof AuthenticatedClientesClienteIdInformacoesRoute
+  '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/clientes/$clienteId/': typeof AuthenticatedClientesClienteIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/planos': typeof PlanosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/chat': typeof AuthenticatedChatRoute
   '/conta': typeof AuthenticatedContaRoute
@@ -183,11 +191,11 @@ export interface FileRoutesByTo {
   '/ferramentas/conteudos': typeof AuthenticatedFerramentasConteudosRoute
   '/ferramentas/ideias': typeof AuthenticatedFerramentasIdeiasRoute
   '/ferramentas/roteiros': typeof AuthenticatedFerramentasRoteirosRoute
-  '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
   '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
   '/clientes/$clienteId/informacoes': typeof AuthenticatedClientesClienteIdInformacoesRoute
+  '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdIndexRoute
 }
 export interface FileRoutesById {
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/planos': typeof PlanosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
   '/_authenticated/conta': typeof AuthenticatedContaRoute
@@ -207,11 +216,11 @@ export interface FileRoutesById {
   '/_authenticated/ferramentas/conteudos': typeof AuthenticatedFerramentasConteudosRoute
   '/_authenticated/ferramentas/ideias': typeof AuthenticatedFerramentasIdeiasRoute
   '/_authenticated/ferramentas/roteiros': typeof AuthenticatedFerramentasRoteirosRoute
-  '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
   '/_authenticated/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/_authenticated/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/_authenticated/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
   '/_authenticated/clientes/$clienteId/informacoes': typeof AuthenticatedClientesClienteIdInformacoesRoute
+  '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/_authenticated/clientes/$clienteId/': typeof AuthenticatedClientesClienteIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -219,6 +228,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/planos'
     | '/reset-password'
     | '/chat'
     | '/conta'
@@ -231,16 +241,17 @@ export interface FileRouteTypes {
     | '/ferramentas/conteudos'
     | '/ferramentas/ideias'
     | '/ferramentas/roteiros'
-    | '/api/webhooks/mercadopago'
     | '/clientes/$clienteId/calendario'
     | '/clientes/$clienteId/conteudos'
     | '/clientes/$clienteId/estrategia'
     | '/clientes/$clienteId/informacoes'
+    | '/api/public/webhooks/stripe'
     | '/clientes/$clienteId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/planos'
     | '/reset-password'
     | '/chat'
     | '/conta'
@@ -252,17 +263,18 @@ export interface FileRouteTypes {
     | '/ferramentas/conteudos'
     | '/ferramentas/ideias'
     | '/ferramentas/roteiros'
-    | '/api/webhooks/mercadopago'
     | '/clientes/$clienteId/calendario'
     | '/clientes/$clienteId/conteudos'
     | '/clientes/$clienteId/estrategia'
     | '/clientes/$clienteId/informacoes'
+    | '/api/public/webhooks/stripe'
     | '/clientes/$clienteId'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/planos'
     | '/reset-password'
     | '/_authenticated/chat'
     | '/_authenticated/conta'
@@ -275,11 +287,11 @@ export interface FileRouteTypes {
     | '/_authenticated/ferramentas/conteudos'
     | '/_authenticated/ferramentas/ideias'
     | '/_authenticated/ferramentas/roteiros'
-    | '/api/webhooks/mercadopago'
     | '/_authenticated/clientes/$clienteId/calendario'
     | '/_authenticated/clientes/$clienteId/conteudos'
     | '/_authenticated/clientes/$clienteId/estrategia'
     | '/_authenticated/clientes/$clienteId/informacoes'
+    | '/api/public/webhooks/stripe'
     | '/_authenticated/clientes/$clienteId/'
   fileRoutesById: FileRoutesById
 }
@@ -287,9 +299,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  PlanosRoute: typeof PlanosRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiChatRoute: typeof ApiChatRoute
-  ApiWebhooksMercadopagoRoute: typeof ApiWebhooksMercadopagoRoute
+  ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -313,6 +326,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/planos': {
+      id: '/planos'
+      path: '/planos'
+      fullPath: '/planos'
+      preLoaderRoute: typeof PlanosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -399,13 +419,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFerramentasRoteirosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/api/webhooks/mercadopago': {
-      id: '/api/webhooks/mercadopago'
-      path: '/api/webhooks/mercadopago'
-      fullPath: '/api/webhooks/mercadopago'
-      preLoaderRoute: typeof ApiWebhooksMercadopagoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/clientes/$clienteId/': {
       id: '/_authenticated/clientes/$clienteId/'
       path: '/'
@@ -440,6 +453,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/clientes/$clienteId/informacoes'
       preLoaderRoute: typeof AuthenticatedClientesClienteIdInformacoesRouteImport
       parentRoute: typeof AuthenticatedClientesClienteIdRouteRoute
+    }
+    '/api/public/webhooks/stripe': {
+      id: '/api/public/webhooks/stripe'
+      path: '/api/public/webhooks/stripe'
+      fullPath: '/api/public/webhooks/stripe'
+      preLoaderRoute: typeof ApiPublicWebhooksStripeRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -507,9 +527,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  PlanosRoute: PlanosRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiChatRoute: ApiChatRoute,
-  ApiWebhooksMercadopagoRoute: ApiWebhooksMercadopagoRoute,
+  ApiPublicWebhooksStripeRoute: ApiPublicWebhooksStripeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarDays, MessagesSquare, Sparkles, Target, Users } from "lucide-react";
 
 import { Logo } from "@/components/logo";
+import { PlanosGrid } from "@/components/planos-grid";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -92,14 +93,14 @@ function Landing() {
         </p>
         <div className="mt-11 flex flex-wrap justify-center gap-3">
           <Button asChild size="lg" className="shadow-glow">
-            <Link to="/auth">Criar minha conta</Link>
+            <Link to="/planos">Ver planos</Link>
           </Button>
           <Button asChild size="lg" variant="outline">
             <Link to="/auth">Já tenho conta</Link>
           </Button>
         </div>
         <p className="mt-6 text-xs text-muted-foreground">
-          Grátis para começar — sem cartão de crédito.
+          Planos a partir de R$ 49/mês. Cancele quando quiser.
         </p>
       </section>
 
@@ -149,6 +150,18 @@ function Landing() {
         </div>
       </section>
 
+      <section id="planos" className="mx-auto max-w-6xl px-6 pb-28">
+        <div className="mx-auto max-w-2xl text-center">
+          <span className="text-xs font-medium tracking-[0.18em] text-primary uppercase">
+            Planos
+          </span>
+          <h2 className="mt-4 text-3xl font-semibold sm:text-4xl">Escolha o seu ritmo</h2>
+        </div>
+        <div className="mt-14">
+          <PlanosGrid />
+        </div>
+      </section>
+
       <section className="mx-auto max-w-4xl px-6 pb-32">
         <div className="rounded-3xl border border-primary/30 bg-primary/10 px-8 py-14 text-center">
           <h2 className="text-3xl font-semibold sm:text-4xl">
@@ -158,7 +171,7 @@ function Landing() {
             Leve minutos para cadastrar e nunca mais procure o briefing em outra aba.
           </p>
           <Button asChild size="lg" className="mt-9 shadow-glow">
-            <Link to="/auth">Criar minha conta</Link>
+            <Link to="/planos">Ver planos</Link>
           </Button>
         </div>
       </section>
