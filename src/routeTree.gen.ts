@@ -24,7 +24,6 @@ import { Route as AuthenticatedFerramentasCalendarioRouteImport } from './routes
 import { Route as AuthenticatedFerramentasConteudosRouteImport } from './routes/_authenticated/ferramentas/conteudos'
 import { Route as AuthenticatedFerramentasIdeiasRouteImport } from './routes/_authenticated/ferramentas/ideias'
 import { Route as AuthenticatedFerramentasRoteirosRouteImport } from './routes/_authenticated/ferramentas/roteiros'
-import { Route as ApiWebhooksMercadopagoRouteImport } from './routes/api/webhooks/mercadopago'
 import { Route as AuthenticatedClientesClienteIdIndexRouteImport } from './routes/_authenticated/clientes/$clienteId/index'
 import { Route as AuthenticatedClientesClienteIdCalendarioRouteImport } from './routes/_authenticated/clientes/$clienteId/calendario'
 import { Route as AuthenticatedClientesClienteIdConteudosRouteImport } from './routes/_authenticated/clientes/$clienteId/conteudos'
@@ -111,11 +110,6 @@ const AuthenticatedFerramentasRoteirosRoute =
     path: '/ferramentas/roteiros',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const ApiWebhooksMercadopagoRoute = ApiWebhooksMercadopagoRouteImport.update({
-  id: '/api/webhooks/mercadopago',
-  path: '/api/webhooks/mercadopago',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedClientesClienteIdIndexRoute =
   AuthenticatedClientesClienteIdIndexRouteImport.update({
     id: '/',
@@ -162,7 +156,6 @@ export interface FileRoutesByFullPath {
   '/ferramentas/conteudos': typeof AuthenticatedFerramentasConteudosRoute
   '/ferramentas/ideias': typeof AuthenticatedFerramentasIdeiasRoute
   '/ferramentas/roteiros': typeof AuthenticatedFerramentasRoteirosRoute
-  '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
   '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
@@ -183,7 +176,6 @@ export interface FileRoutesByTo {
   '/ferramentas/conteudos': typeof AuthenticatedFerramentasConteudosRoute
   '/ferramentas/ideias': typeof AuthenticatedFerramentasIdeiasRoute
   '/ferramentas/roteiros': typeof AuthenticatedFerramentasRoteirosRoute
-  '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
   '/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
@@ -207,7 +199,6 @@ export interface FileRoutesById {
   '/_authenticated/ferramentas/conteudos': typeof AuthenticatedFerramentasConteudosRoute
   '/_authenticated/ferramentas/ideias': typeof AuthenticatedFerramentasIdeiasRoute
   '/_authenticated/ferramentas/roteiros': typeof AuthenticatedFerramentasRoteirosRoute
-  '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
   '/_authenticated/clientes/$clienteId/calendario': typeof AuthenticatedClientesClienteIdCalendarioRoute
   '/_authenticated/clientes/$clienteId/conteudos': typeof AuthenticatedClientesClienteIdConteudosRoute
   '/_authenticated/clientes/$clienteId/estrategia': typeof AuthenticatedClientesClienteIdEstrategiaRoute
@@ -231,7 +222,6 @@ export interface FileRouteTypes {
     | '/ferramentas/conteudos'
     | '/ferramentas/ideias'
     | '/ferramentas/roteiros'
-    | '/api/webhooks/mercadopago'
     | '/clientes/$clienteId/calendario'
     | '/clientes/$clienteId/conteudos'
     | '/clientes/$clienteId/estrategia'
@@ -252,7 +242,6 @@ export interface FileRouteTypes {
     | '/ferramentas/conteudos'
     | '/ferramentas/ideias'
     | '/ferramentas/roteiros'
-    | '/api/webhooks/mercadopago'
     | '/clientes/$clienteId/calendario'
     | '/clientes/$clienteId/conteudos'
     | '/clientes/$clienteId/estrategia'
@@ -275,7 +264,6 @@ export interface FileRouteTypes {
     | '/_authenticated/ferramentas/conteudos'
     | '/_authenticated/ferramentas/ideias'
     | '/_authenticated/ferramentas/roteiros'
-    | '/api/webhooks/mercadopago'
     | '/_authenticated/clientes/$clienteId/calendario'
     | '/_authenticated/clientes/$clienteId/conteudos'
     | '/_authenticated/clientes/$clienteId/estrategia'
@@ -289,7 +277,6 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiChatRoute: typeof ApiChatRoute
-  ApiWebhooksMercadopagoRoute: typeof ApiWebhooksMercadopagoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -399,13 +386,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFerramentasRoteirosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/api/webhooks/mercadopago': {
-      id: '/api/webhooks/mercadopago'
-      path: '/api/webhooks/mercadopago'
-      fullPath: '/api/webhooks/mercadopago'
-      preLoaderRoute: typeof ApiWebhooksMercadopagoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/clientes/$clienteId/': {
       id: '/_authenticated/clientes/$clienteId/'
       path: '/'
@@ -509,7 +489,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiChatRoute: ApiChatRoute,
-  ApiWebhooksMercadopagoRoute: ApiWebhooksMercadopagoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
