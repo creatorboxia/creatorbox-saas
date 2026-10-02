@@ -196,3 +196,9 @@ DROP POLICY IF EXISTS "avatars_delete_own" ON storage.objects;
 CREATE POLICY "avatars_delete_own" ON storage.objects
   FOR DELETE TO authenticated
   USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
+
+-- ===================== assinaturas Stripe =====================
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;
+CREATE INDEX IF NOT EXISTS profiles_stripe_subscription_idx ON public.profiles (stripe_subscription_id);
+CREATE INDEX IF NOT EXISTS profiles_email_idx ON public.profiles (lower(email));

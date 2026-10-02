@@ -46,9 +46,9 @@ function ResetPassword() {
         onSubmit={salvar}
         className="w-full max-w-md rounded-2xl border border-border bg-card/80 p-8 shadow-glow"
       >
-        <h1 className="text-2xl font-semibold">Criar nova senha</h1>
+        <h1 className="text-2xl font-semibold">Defina sua senha</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Escolha uma senha nova para voltar a acessar sua conta.
+          Escolha uma senha para acessar o CreatorBox.
         </p>
         <div className="mt-6 space-y-2">
           <Label htmlFor="nova-senha">Nova senha</Label>
