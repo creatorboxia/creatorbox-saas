@@ -34,7 +34,6 @@ function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [verificando, setVerificando] = useState(true);
-  const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [aguardandoConfirmacao, setAguardandoConfirmacao] = useState(false);
@@ -70,24 +69,21 @@ function AuthPage() {
     navigate({ to: "/dashboard", replace: true });
   }
 
-  async function cadastrar(e: React.FormEvent) {
+  async function linkMagico(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      password: senha,
-      options: { emailRedirectTo: window.location.origin, data: { nome } },
+      options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/dashboard` },
     });
     setLoading(false);
     if (error) {
-      toast.error("Não foi possível criar a conta", { description: error.message });
+      toast.error("Não encontramos uma assinatura para este e-mail", {
+        description: "Assine um plano para criar seu acesso.",
+      });
       return;
     }
-    if (!data.session) {
-      setAguardandoConfirmacao(true);
-      return;
-    }
-    navigate({ to: "/dashboard", replace: true });
+    setAguardandoConfirmacao(true);
   }
 
   async function comGoogle() {
@@ -131,10 +127,10 @@ function AuthPage() {
   if (aguardandoConfirmacao) {
     return (
       <Shell>
-        <h1 className="text-2xl font-semibold">Confirme seu e-mail</h1>
+        <h1 className="text-2xl font-semibold">Confira seu e-mail</h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          Enviamos um link de confirmação para <strong className="text-foreground">{email}</strong>.
-          Abra o link para ativar sua conta e entrar.
+          Enviamos um link de acesso para <strong className="text-foreground">{email}</strong>.
+          Abra o link para entrar no seu painel.
         </p>
         <Button variant="outline" className="mt-6 w-full" onClick={() => setAguardandoConfirmacao(false)}>
           Voltar
@@ -155,7 +151,7 @@ function AuthPage() {
       <Tabs defaultValue="entrar" className="mt-8">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="entrar">Entrar</TabsTrigger>
-          <TabsTrigger value="criar">Criar conta</TabsTrigger>
+          <TabsTrigger value="link">Link mágico</TabsTrigger>
         </TabsList>
 
         <TabsContent value="entrar">
@@ -181,19 +177,11 @@ function AuthPage() {
           </form>
         </TabsContent>
 
-        <TabsContent value="criar">
-          <form onSubmit={cadastrar} className="space-y-4">
-            <Campo id="nome" label="Seu nome" type="text" value={nome} onChange={setNome} />
-            <Campo id="email-novo" label="E-mail" type="email" value={email} onChange={setEmail} />
-            <Campo
-              id="senha-nova"
-              label="Senha"
-              type="password"
-              value={senha}
-              onChange={setSenha}
-            />
+        <TabsContent value="link">
+          <form onSubmit={linkMagico} className="space-y-4">
+            <Campo id="email-link" label="E-mail" type="email" value={email} onChange={setEmail} />
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? <Loader2 className="size-4 animate-spin" /> : "Criar conta"}
+              {loading ? <Loader2 className="size-4 animate-spin" /> : "Enviar link de acesso"}
             </Button>
           </form>
         </TabsContent>
@@ -208,6 +196,13 @@ function AuthPage() {
       <Button variant="outline" className="w-full" onClick={comGoogle} disabled={loading}>
         Continuar com Google
       </Button>
+
+      <p className="mt-6 rounded-xl border border-border bg-background/50 p-4 text-center text-sm text-muted-foreground">
+        Ainda não tem conta? O acesso é exclusivo para assinantes.{" "}
+        <Link to="/planos" className="font-medium text-primary hover:underline">
+          Ver planos
+        </Link>
+      </p>
 
       <Link
         to="/"
