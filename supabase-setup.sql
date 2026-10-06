@@ -202,3 +202,18 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;
 CREATE INDEX IF NOT EXISTS profiles_stripe_subscription_idx ON public.profiles (stripe_subscription_id);
 CREATE INDEX IF NOT EXISTS profiles_email_idx ON public.profiles (lower(email));
+
+-- ============================================================
+-- stripe_processed_events: idempotência do webhook do Stripe
+-- Impede que retransmissões criem contas ou liberem créditos
+-- em duplicidade. Acesso exclusivo via service role (webhook).
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.stripe_processed_events (
+  event_id TEXT PRIMARY KEY,
+  tipo TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'processed',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+GRANT ALL ON public.stripe_processed_events TO service_role;
+ALTER TABLE public.stripe_processed_events ENABLE ROW LEVEL SECURITY;
+-- Sem policies: ninguém além do service role (que ignora RLS) acessa.

@@ -58,6 +58,16 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
         const { externalSupabaseAdmin: admin } = await import(
           "@/integrations/external/client.server"
         );
+
+        // Idempotência: o Stripe retransmite eventos; se este event.id já foi
+        // processado, responde 200 sem criar conta ou liberar créditos de novo.
+        const { data: jaProcessado } = await admin
+          .from("stripe_processed_events")
+          .select("event_id")
+          .eq("event_id", evento.id)
+          .maybeSingle();
+        if (jaProcessado) return new Response("ok");
+
         const appUrl = (process.env["APP_URL"] ?? new URL(request.url).origin).replace(/\/$/, "");
 
         try {
@@ -136,6 +146,14 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
         } catch (e) {
           console.error("[Stripe] Erro ao processar", evento.type, e);
           return new Response("erro", { status: 500 });
+        }
+
+        // Marca o evento como processado para bloquear retransmissões.
+        const { error: erroEvento } = await admin
+          .from("stripe_processed_events")
+          .insert({ event_id: evento.id, tipo: evento.type });
+        if (erroEvento) {
+          console.error("[Stripe] Falha ao registrar evento processado", evento.id, erroEvento);
         }
 
         return new Response("ok");
