@@ -148,6 +148,14 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
           return new Response("erro", { status: 500 });
         }
 
+        // Marca o evento como processado para bloquear retransmissões.
+        const { error: erroEvento } = await admin
+          .from("stripe_processed_events")
+          .insert({ event_id: evento.id, tipo: evento.type });
+        if (erroEvento) {
+          console.error("[Stripe] Falha ao registrar evento processado", evento.id, erroEvento);
+        }
+
         return new Response("ok");
       },
     },
