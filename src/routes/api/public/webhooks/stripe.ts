@@ -15,9 +15,7 @@ function assinaturaValida(corpo: string, header: string | null, segredo: string)
   if (!t || v1.length === 0) return false;
   // Tolerância de 5 minutos contra replay.
   if (Math.abs(Date.now() / 1000 - Number(t)) > 300) return false;
-  const esperado = Buffer.from(
-    createHmac("sha256", segredo).update(`${t}.${corpo}`).digest("hex"),
-  );
+  const esperado = Buffer.from(createHmac("sha256", segredo).update(`${t}.${corpo}`).digest("hex"));
   return v1.some((s) => {
     const b = Buffer.from(s);
     return b.length === esperado.length && timingSafeEqual(b, esperado);
@@ -72,9 +70,8 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
           type: string;
           data: { object: Record<string, unknown> };
         };
-        const { externalSupabaseAdmin: admin } = await import(
-          "@/integrations/external/client.server"
-        );
+        const { externalSupabaseAdmin: admin } =
+          await import("@/integrations/external/client.server");
 
         // Idempotência: o Stripe retransmite eventos; se este event.id já foi
         // processado, responde 200 sem criar conta ou liberar créditos de novo.
@@ -146,7 +143,10 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
             };
             // Renovação mensal: o saldo volta ao total do plano (não acumula).
             if (fatura.billing_reason === "subscription_cycle" && fatura.subscription) {
-              const sub = await stripeGet<Assinatura>(`subscriptions/${fatura.subscription}`, chave);
+              const sub = await stripeGet<Assinatura>(
+                `subscriptions/${fatura.subscription}`,
+                chave,
+              );
               const plano = planoDaAssinatura(sub);
               if (plano) {
                 await admin
@@ -162,7 +162,8 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
             evento.type === "customer.subscription.deleted"
           ) {
             const sub = evento.data.object as unknown as Assinatura;
-            const status = evento.type === "customer.subscription.deleted" ? "canceled" : sub.status;
+            const status =
+              evento.type === "customer.subscription.deleted" ? "canceled" : sub.status;
             const plano = planoDaAssinatura(sub);
             await admin
               .from("profiles")
