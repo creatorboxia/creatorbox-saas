@@ -4,6 +4,7 @@ import { CalendarDays, MessagesSquare, Sparkles, Target, Users } from "lucide-re
 import { Logo } from "@/components/logo";
 import { PlanosGrid } from "@/components/planos-grid";
 import { Button } from "@/components/ui/button";
+import { PLANOS, formatarPreco } from "@/lib/planos";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -100,7 +101,8 @@ function Landing() {
           </Button>
         </div>
         <p className="mt-6 text-xs text-muted-foreground">
-          Planos a partir de R$ 49/mês. Cancele quando quiser.
+          Planos a partir de {formatarPreco(Math.min(...PLANOS.map((p) => p.precoCentavos)))}/mês.
+          Cancele quando quiser.
         </p>
       </section>
 
