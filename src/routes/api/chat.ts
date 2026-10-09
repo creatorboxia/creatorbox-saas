@@ -16,7 +16,7 @@ import {
 
 // Custo fixo por mensagem enviada ao assistente. Mesmo valor usado em
 // creatorbox.functions.ts — ajustar nos dois lugares se mudar.
-const CUSTO_CREDITOS_MENSAGEM = 10;
+const CUSTO_CREDITOS_MENSAGEM = 1;
 
 const bodySchema = z.object({
   conversaId: z.string().uuid().nullable().optional(),
