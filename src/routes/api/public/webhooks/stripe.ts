@@ -32,7 +32,24 @@ async function stripeGet<T>(caminho: string, chave: string): Promise<T> {
   return (await r.json()) as T;
 }
 
-type Assinatura = { id: string; customer: string; status: string; metadata: { plano?: string } };
+type Assinatura = {
+  id: string;
+  customer: string;
+  status: string;
+  metadata: { plano?: string };
+  items?: { data?: { price?: { id?: string } }[] };
+};
+
+// O plano chega pelos metadados da assinatura. Quando eles faltarem — contas
+// criadas antes dessa convenção, ou assinaturas editadas no painel do Stripe —
+// o Price cobrado no item ainda identifica o plano.
+function priceIdDaAssinatura(sub: Assinatura) {
+  return sub.items?.data?.[0]?.price?.id;
+}
+
+function planoDaAssinatura(sub: Assinatura): Plano | undefined {
+  return getPlano(sub.metadata?.plano) ?? getPlanoPorPriceId(priceIdDaAssinatura(sub));
+}
 
 export const Route = createFileRoute("/api/public/webhooks/stripe")({
   server: {
@@ -77,11 +94,20 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
               customer?: string;
               subscription?: string;
               customer_details?: { email?: string; name?: string };
-              metadata?: { plano?: string };
+              metadata?: { plano?: string; price_id?: string };
             };
             if (sessao.mode !== "subscription") return new Response("ignorado");
             const email = sessao.customer_details?.email?.toLowerCase();
-            const plano = getPlano(sessao.metadata?.plano);
+            let plano =
+              getPlano(sessao.metadata?.plano) ?? getPlanoPorPriceId(sessao.metadata?.price_id);
+            // Último recurso: lê o Price direto da assinatura criada pela sessão.
+            if (!plano && sessao.subscription) {
+              const sub = await stripeGet<Assinatura>(
+                `subscriptions/${sessao.subscription}`,
+                chave,
+              );
+              plano = planoDaAssinatura(sub);
+            }
             if (!email || !plano) return new Response("dados incompletos", { status: 400 });
 
             // Procura o perfil pelo e-mail; se não existir, convida (cria a conta e
@@ -121,7 +147,7 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
             // Renovação mensal: o saldo volta ao total do plano (não acumula).
             if (fatura.billing_reason === "subscription_cycle" && fatura.subscription) {
               const sub = await stripeGet<Assinatura>(`subscriptions/${fatura.subscription}`, chave);
-              const plano = getPlano(sub.metadata?.plano);
+              const plano = planoDaAssinatura(sub);
               if (plano) {
                 await admin
                   .from("profiles")
@@ -137,7 +163,7 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
           ) {
             const sub = evento.data.object as unknown as Assinatura;
             const status = evento.type === "customer.subscription.deleted" ? "canceled" : sub.status;
-            const plano = getPlano(sub.metadata?.plano);
+            const plano = planoDaAssinatura(sub);
             await admin
               .from("profiles")
               .update({ status_assinatura: status, ...(plano ? { plano: plano.id } : {}) })
