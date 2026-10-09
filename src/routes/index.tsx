@@ -111,7 +111,9 @@ function Landing() {
           <span className="text-xs font-medium tracking-[0.18em] text-primary uppercase">
             Como funciona
           </span>
-          <h2 className="mt-4 text-3xl font-semibold sm:text-4xl">Três passos e o mês está pronto</h2>
+          <h2 className="mt-4 text-3xl font-semibold sm:text-4xl">
+            Três passos e o mês está pronto
+          </h2>
         </div>
         <div className="mt-14 grid gap-4 sm:grid-cols-3">
           {passos.map((p) => (
