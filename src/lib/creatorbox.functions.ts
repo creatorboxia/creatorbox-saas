@@ -65,7 +65,7 @@ export type Perfil = {
 };
 
 // Custo fixo por mensagem enviada ao assistente. Ajustável em um único lugar.
-export const CUSTO_CREDITOS_MENSAGEM = 10;
+export const CUSTO_CREDITOS_MENSAGEM = 1;
 
 export const getPerfil = createServerFn({ method: "GET" })
   .middleware([requireExternalAuth])
