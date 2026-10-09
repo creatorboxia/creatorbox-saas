@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHmac, timingSafeEqual } from "crypto";
 
-import { getPlano } from "@/lib/planos";
+import { getPlano, getPlanoPorPriceId, type Plano } from "@/lib/planos";
 
 function assinaturaValida(corpo: string, header: string | null, segredo: string) {
   if (!header) return false;
