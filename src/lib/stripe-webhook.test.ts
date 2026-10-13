@@ -1,3 +1,4 @@
+// @ts-ignore -- tipos do bun:test não estão instalados; rode com `bun test`.
 import { describe, expect, test } from "bun:test";
 
 import {
