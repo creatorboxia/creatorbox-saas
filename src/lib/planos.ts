@@ -22,7 +22,7 @@ export const PLANOS: Plano[] = [
   {
     id: "starter",
     nome: "Starter",
-    precoCentavos: 5900,
+    precoCentavos: 5990,
     stripePriceId: "price_1UNkcIK4G4aq7zPNknCXfj2e",
     creditos: 50,
     descricao: "Para quem está começando com 1 a 2 clientes.",
@@ -31,7 +31,7 @@ export const PLANOS: Plano[] = [
   {
     id: "pro",
     nome: "Pro",
-    precoCentavos: 9900,
+    precoCentavos: 9990,
     stripePriceId: "price_1UNkemK4G4aq7zPN7omEfr4H",
     creditos: 150,
     descricao: "Para social medias em crescimento.",
@@ -41,7 +41,7 @@ export const PLANOS: Plano[] = [
   {
     id: "agencia",
     nome: "Agência",
-    precoCentavos: 14700,
+    precoCentavos: 14790,
     stripePriceId: "price_1UNkgdK4G4aq7zPNssodAmFF",
     creditos: 400,
     descricao: "Para múltiplos clientes e alto volume.",
