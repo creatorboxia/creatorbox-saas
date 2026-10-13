@@ -2,6 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createHmac, timingSafeEqual } from "crypto";
 
 import { getPlano, getPlanoPorPriceId, type Plano } from "@/lib/planos";
+import {
+  assinaturaDaFatura,
+  decidirEventoExistente,
+  escaparLike,
+  type Fatura,
+  type StatusEvento,
+} from "@/lib/stripe-webhook";
 
 function assinaturaValida(corpo: string, header: string | null, segredo: string) {
   if (!header) return false;
@@ -73,16 +80,71 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
         const { externalSupabaseAdmin: admin } =
           await import("@/integrations/external/client.server");
 
-        // Idempotência: o Stripe retransmite eventos; se este event.id já foi
-        // processado, responde 200 sem criar conta ou liberar créditos de novo.
-        const { data: jaProcessado } = await admin
+        // Idempotência com estados: processing → processed | failed.
+        // O insert com event_id como chave primária "reserva" o evento de forma
+        // atômica, então dois avisos simultâneos não processam em dobro.
+        const { error: erroReserva } = await admin
           .from("stripe_processed_events")
-          .select("event_id")
-          .eq("event_id", evento.id)
-          .maybeSingle();
-        if (jaProcessado) return new Response("ok");
+          .insert({ event_id: evento.id, tipo: evento.type, status: "processing" });
+        if (erroReserva) {
+          if (erroReserva.code !== "23505") {
+            console.error("[Stripe] Falha ao reservar evento", evento.id, erroReserva);
+            return new Response("erro", { status: 500 });
+          }
+          const { data: reg, error: erroLeitura } = await admin
+            .from("stripe_processed_events")
+            .select("status, created_at")
+            .eq("event_id", evento.id)
+            .maybeSingle();
+          if (erroLeitura || !reg) {
+            console.error("[Stripe] Falha ao ler evento", evento.id, erroLeitura);
+            return new Response("erro", { status: 500 });
+          }
+          const r = reg as { status: string; created_at: string | null };
+          const decisao = decidirEventoExistente(r.status, r.created_at);
+          if (decisao === "ignorar") return new Response("ok");
+          // Outro processamento em andamento: a Stripe tenta de novo depois.
+          if (decisao === "aguardar") return new Response("em processamento", { status: 409 });
+          // Reprocessa (falhou ou travou): reserva condicional ao estado lido.
+          let q = admin
+            .from("stripe_processed_events")
+            .update({ status: "processing", created_at: new Date().toISOString() })
+            .eq("event_id", evento.id)
+            .eq("status", r.status);
+          if (r.created_at) q = q.eq("created_at", r.created_at);
+          const { data: reservado, error: erroRetomada } = await q.select("event_id");
+          if (erroRetomada) {
+            console.error("[Stripe] Falha ao retomar evento", evento.id, erroRetomada);
+            return new Response("erro", { status: 500 });
+          }
+          if (!reservado || reservado.length === 0) {
+            return new Response("em processamento", { status: 409 });
+          }
+        }
+
+        const marcar = async (status: StatusEvento) => {
+          const { error } = await admin
+            .from("stripe_processed_events")
+            .update({ status })
+            .eq("event_id", evento.id);
+          if (error) console.error("[Stripe] Falha ao marcar evento", evento.id, status, error);
+          return !error;
+        };
 
         const appUrl = (process.env["APP_URL"] ?? new URL(request.url).origin).replace(/\/$/, "");
+
+        // Atualiza perfis pela assinatura e exige que ao menos um seja encontrado.
+        const atualizarPorAssinatura = async (subId: string, campos: Record<string, unknown>) => {
+          const { data, error } = await admin
+            .from("profiles")
+            .update(campos)
+            .eq("stripe_subscription_id", subId)
+            .select("id");
+          if (error) throw new Error(error.message);
+          if (!data || data.length === 0) {
+            throw new Error(`Nenhum perfil com a assinatura ${subId}`);
+          }
+        };
 
         try {
           if (evento.type === "checkout.session.completed") {
@@ -93,8 +155,11 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
               customer_details?: { email?: string; name?: string };
               metadata?: { plano?: string; price_id?: string };
             };
-            if (sessao.mode !== "subscription") return new Response("ignorado");
-            const email = sessao.customer_details?.email?.toLowerCase();
+            if (sessao.mode !== "subscription") {
+              await marcar("processed");
+              return new Response("ignorado");
+            }
+            const email = sessao.customer_details?.email?.trim().toLowerCase();
             let plano =
               getPlano(sessao.metadata?.plano) ?? getPlanoPorPriceId(sessao.metadata?.price_id);
             // Último recurso: lê o Price direto da assinatura criada pela sessão.
@@ -105,16 +170,24 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
               );
               plano = planoDaAssinatura(sub);
             }
-            if (!email || !plano) return new Response("dados incompletos", { status: 400 });
+            if (!email || !plano) {
+              console.error("[Stripe] Checkout sem e-mail ou plano", evento.id);
+              await marcar("failed");
+              return new Response("dados incompletos", { status: 400 });
+            }
 
-            // Procura o perfil pelo e-mail; se não existir, convida (cria a conta e
-            // envia o e-mail de primeiro acesso para definir a senha).
-            const { data: existente } = await admin
+            // Procura o perfil pelo e-mail (sem diferenciar maiúsculas); se não
+            // existir, convida (cria a conta e envia o e-mail de primeiro acesso).
+            const { data: existentes, error: erroBusca } = await admin
               .from("profiles")
               .select("id")
-              .eq("email", email)
-              .maybeSingle();
-            let userId = (existente as { id: string } | null)?.id;
+              .ilike("email", escaparLike(email))
+              .limit(2);
+            if (erroBusca) throw new Error(erroBusca.message);
+            if (existentes && existentes.length > 1) {
+              throw new Error(`Mais de um perfil com o e-mail da compra (${evento.id})`);
+            }
+            let userId = (existentes?.[0] as { id: string } | undefined)?.id;
             if (!userId) {
               const { data: convite, error } = await admin.auth.admin.inviteUserByEmail(email, {
                 redirectTo: `${appUrl}/reset-password?primeiro=1`,
@@ -137,23 +210,18 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
           }
 
           if (evento.type === "invoice.paid") {
-            const fatura = evento.data.object as {
-              billing_reason?: string;
-              subscription?: string;
-            };
+            const fatura = evento.data.object as Fatura;
+            const subId = assinaturaDaFatura(fatura);
             // Renovação mensal: o saldo volta ao total do plano (não acumula).
-            if (fatura.billing_reason === "subscription_cycle" && fatura.subscription) {
-              const sub = await stripeGet<Assinatura>(
-                `subscriptions/${fatura.subscription}`,
-                chave,
-              );
+            if (fatura.billing_reason === "subscription_cycle") {
+              if (!subId) throw new Error("Fatura de renovação sem assinatura");
+              const sub = await stripeGet<Assinatura>(`subscriptions/${subId}`, chave);
               const plano = planoDaAssinatura(sub);
-              if (plano) {
-                await admin
-                  .from("profiles")
-                  .update({ saldo_creditos: plano.creditos, status_assinatura: "active" })
-                  .eq("stripe_subscription_id", sub.id);
-              }
+              if (!plano) throw new Error(`Plano não identificado na assinatura ${sub.id}`);
+              await atualizarPorAssinatura(sub.id, {
+                saldo_creditos: plano.creditos,
+                status_assinatura: "active",
+              });
             }
           }
 
@@ -165,24 +233,19 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
             const status =
               evento.type === "customer.subscription.deleted" ? "canceled" : sub.status;
             const plano = planoDaAssinatura(sub);
-            await admin
-              .from("profiles")
-              .update({ status_assinatura: status, ...(plano ? { plano: plano.id } : {}) })
-              .eq("stripe_subscription_id", sub.id);
+            await atualizarPorAssinatura(sub.id, {
+              status_assinatura: status,
+              ...(plano ? { plano: plano.id } : {}),
+            });
           }
         } catch (e) {
-          console.error("[Stripe] Erro ao processar", evento.type, e);
+          console.error("[Stripe] Erro ao processar", evento.type, evento.id, e);
+          await marcar("failed");
           return new Response("erro", { status: 500 });
         }
 
-        // Marca o evento como processado para bloquear retransmissões.
-        const { error: erroEvento } = await admin
-          .from("stripe_processed_events")
-          .insert({ event_id: evento.id, tipo: evento.type });
-        if (erroEvento) {
-          console.error("[Stripe] Falha ao registrar evento processado", evento.id, erroEvento);
-        }
-
+        // Só marca como concluído depois de todas as gravações darem certo.
+        if (!(await marcar("processed"))) return new Response("erro", { status: 500 });
         return new Response("ok");
       },
     },
