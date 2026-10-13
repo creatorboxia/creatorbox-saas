@@ -12,3 +12,4 @@
 <!-- LOVABLE:END -->
 
 - Build chat transcripts and composers from the installed AI Elements primitives so markdown, scrolling, and input behavior remain consistent.
+- Stripe webhook pure logic lives in src/lib/stripe-webhook.ts (tested with `bun test`); events go processing → processed|failed in stripe_processed_events so retries are safe.
