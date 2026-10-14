@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { requireExternalAuth } from "@/integrations/external/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
+import { podeSeguirExclusao } from "@/lib/anexos-erros";
 
 type SupabaseClientType = SupabaseClient<Database>;
 
