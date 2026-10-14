@@ -150,8 +150,65 @@ export const deleteCliente = createServerFn({ method: "POST" })
   .middleware([requireExternalAuth])
   .inputValidator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("clientes").delete().eq("id", data.id);
+    // 1) Confirma que o cliente é do usuário antes de tocar em qualquer arquivo.
+    const { data: cli, error: cliErr } = await context.supabase
+      .from("clientes")
+      .select("id")
+      .eq("id", data.id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (cliErr) throw new Error(cliErr.message);
+    if (!cli) throw new Error("Cliente não encontrado.");
+
+    // 2) Conteúdos desse cliente (só do usuário).
+    const { data: conts, error: contErr } = await context.supabase
+      .from("conteudos")
+      .select("id")
+      .eq("cliente_id", data.id)
+      .eq("user_id", context.userId);
+    if (contErr) throw new Error(contErr.message);
+    const ids = (conts ?? []).map((c) => c.id);
+
+    // 3) Arquivos físicos: o Storage não é limpo pela cascata do banco, então removemos antes.
+    if (ids.length) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sb = context.supabase as any;
+      const anexos = await sb
+        .from("conteudo_anexos")
+        .select("caminho")
+        .in("conteudo_id", ids)
+        .eq("user_id", context.userId);
+      // Tabela de anexos ainda não criada no banco: não há arquivos a remover.
+      const tabelaAusente = anexos.error?.code === "42P01" || anexos.error?.code === "PGRST205";
+      if (anexos.error && !tabelaAusente) {
+        throw new Error(`Não foi possível listar os anexos: ${anexos.error.message}`);
+      }
+      const prefixo = `${context.userId}/`;
+      const caminhos = ((anexos.data ?? []) as { caminho: string }[])
+        .map((a) => a.caminho)
+        .filter((c) => c.startsWith(prefixo)); // nunca toca na pasta de outro usuário
+      for (let i = 0; i < caminhos.length; i += 100) {
+        const st = await context.supabase.storage
+          .from("conteudo-anexos")
+          .remove(caminhos.slice(i, i + 100));
+        if (st.error) {
+          // Cliente e metadados ficam intactos: nada é ocultado; o usuário pode tentar de novo.
+          throw new Error(
+            `Não foi possível apagar os arquivos do cliente. Nada foi excluído; tente novamente. (${st.error.message})`,
+          );
+        }
+      }
+    }
+
+    // 4) Só então apaga o cliente; conteúdos e metadados de anexos caem em cascata.
+    const { data: rows, error } = await context.supabase
+      .from("clientes")
+      .delete()
+      .eq("id", data.id)
+      .eq("user_id", context.userId)
+      .select("id");
     if (error) throw new Error(error.message);
+    if (!rows || rows.length === 0) throw new Error("Cliente não encontrado.");
     return { ok: true };
   });
 
