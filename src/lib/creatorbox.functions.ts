@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { requireExternalAuth } from "@/integrations/external/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
+import { podeSeguirExclusao } from "@/lib/anexos-erros";
 
 type SupabaseClientType = SupabaseClient<Database>;
 
@@ -179,8 +180,7 @@ export const deleteCliente = createServerFn({ method: "POST" })
         .in("conteudo_id", ids)
         .eq("user_id", context.userId);
       // Tabela de anexos ainda não criada no banco: não há arquivos a remover.
-      const tabelaAusente = anexos.error?.code === "42P01" || anexos.error?.code === "PGRST205";
-      if (anexos.error && !tabelaAusente) {
+      if (!podeSeguirExclusao(anexos.error)) {
         throw new Error(`Não foi possível listar os anexos: ${anexos.error.message}`);
       }
       const prefixo = `${context.userId}/`;
@@ -282,7 +282,7 @@ export const deleteConteudo = createServerFn({ method: "POST" })
   .inputValidator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     // Apaga os arquivos anexados no Storage antes (as linhas de metadados caem em cascata).
-    // Se a tabela de anexos ainda não existir, segue a exclusão normalmente.
+    // Só segue sem listar quando a tabela de anexos ainda não existe; qualquer outro erro interrompe.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = context.supabase as any;
     const anexos = await sb
@@ -290,10 +290,22 @@ export const deleteConteudo = createServerFn({ method: "POST" })
       .select("caminho")
       .eq("conteudo_id", data.id)
       .eq("user_id", context.userId);
-    const caminhos = ((anexos.data ?? []) as { caminho: string }[]).map((a) => a.caminho);
+    if (!podeSeguirExclusao(anexos.error)) {
+      throw new Error(
+        `Não foi possível verificar os anexos. Nada foi excluído; tente novamente. (${anexos.error.message})`,
+      );
+    }
+    const prefixo = `${context.userId}/`;
+    const caminhos = ((anexos.data ?? []) as { caminho: string }[])
+      .map((a) => a.caminho)
+      .filter((c) => c.startsWith(prefixo));
     if (caminhos.length) {
       const st = await context.supabase.storage.from("conteudo-anexos").remove(caminhos);
-      if (st.error) throw new Error(`Não foi possível apagar os anexos: ${st.error.message}`);
+      if (st.error) {
+        throw new Error(
+          `Não foi possível apagar os anexos. Nada foi excluído; tente novamente. (${st.error.message})`,
+        );
+      }
     }
 
     // Filtro explícito por dono, além do RLS; confirma que algo foi de fato removido.

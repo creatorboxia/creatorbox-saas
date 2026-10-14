@@ -242,24 +242,55 @@ CREATE TABLE IF NOT EXISTS public.conteudo_anexos (
   conteudo_id UUID NOT NULL REFERENCES public.conteudos(id) ON DELETE CASCADE,
   caminho TEXT NOT NULL UNIQUE,
   nome TEXT NOT NULL,
-  mime_type TEXT NOT NULL,
+  mime_type TEXT NOT NULL CONSTRAINT conteudo_anexos_mime_check CHECK (mime_type IN
+    ('image/jpeg','image/png','image/webp','video/mp4','video/quicktime','application/pdf')),
   tamanho BIGINT NOT NULL CHECK (tamanho > 0 AND tamanho <= 52428800),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS conteudo_anexos_conteudo_idx ON public.conteudo_anexos (conteudo_id);
 CREATE INDEX IF NOT EXISTS conteudo_anexos_user_idx ON public.conteudo_anexos (user_id);
 
+-- Tabela já existente: adiciona a restrição de formatos sem recriar nem apagar dados.
+-- NOT VALID passa a valer para novas linhas na hora; só valida as antigas se todas forem aceitas.
+DO $$
+DECLARE invalidos INTEGER;
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint
+                 WHERE conname = 'conteudo_anexos_mime_check'
+                   AND conrelid = 'public.conteudo_anexos'::regclass) THEN
+    ALTER TABLE public.conteudo_anexos ADD CONSTRAINT conteudo_anexos_mime_check
+      CHECK (mime_type IN ('image/jpeg','image/png','image/webp','video/mp4','video/quicktime','application/pdf'))
+      NOT VALID;
+  END IF;
+  SELECT count(*) INTO invalidos FROM public.conteudo_anexos
+   WHERE mime_type NOT IN ('image/jpeg','image/png','image/webp','video/mp4','video/quicktime','application/pdf');
+  IF invalidos = 0 THEN
+    ALTER TABLE public.conteudo_anexos VALIDATE CONSTRAINT conteudo_anexos_mime_check;
+  ELSE
+    RAISE NOTICE 'conteudo_anexos: % registro(s) com formato fora da lista; mantidos intactos. Restrição vale para novos anexos.', invalidos;
+  END IF;
+END $$;
+
 GRANT SELECT, INSERT, DELETE ON public.conteudo_anexos TO authenticated;
 GRANT ALL ON public.conteudo_anexos TO service_role;
 ALTER TABLE public.conteudo_anexos ENABLE ROW LEVEL SECURITY;
 
--- Limite de 10 por conteúdo, seguro com envios simultâneos:
--- trava a linha do conteúdo, então inserções paralelas entram em fila.
+-- Limite de 10 por conteúdo, seguro com envios simultâneos.
+-- Primeiro confirma que o conteúdo é do usuário autenticado; só então trava a linha e conta.
+-- (auth.uid() nulo = service role/servidor, que já é confiável.)
 CREATE OR REPLACE FUNCTION public.conteudo_anexos_limite()
 RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE n INTEGER;
 BEGIN
-  PERFORM 1 FROM public.conteudos WHERE id = NEW.conteudo_id FOR UPDATE;
+  IF auth.uid() IS NOT NULL AND NEW.user_id IS DISTINCT FROM auth.uid() THEN
+    RAISE EXCEPTION 'Anexo inválido.' USING ERRCODE = 'insufficient_privilege';
+  END IF;
+  PERFORM 1 FROM public.conteudos
+   WHERE id = NEW.conteudo_id AND user_id = NEW.user_id
+   FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Conteúdo não encontrado.' USING ERRCODE = 'insufficient_privilege';
+  END IF;
   SELECT count(*) INTO n FROM public.conteudo_anexos WHERE conteudo_id = NEW.conteudo_id;
   IF n >= 10 THEN
     RAISE EXCEPTION 'Limite de 10 arquivos por conteúdo.' USING ERRCODE = 'check_violation';
