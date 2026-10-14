@@ -31,7 +31,10 @@ export const Route = createFileRoute("/_authenticated/ferramentas/calendario")({
       { title: "Calendário — CreatorBox" },
       { name: "description", content: "Calendário mensal de publicações de todos os clientes." },
       { property: "og:title", content: "Calendário — CreatorBox" },
-      { property: "og:description", content: "Calendário mensal de publicações de todos os clientes." },
+      {
+        property: "og:description",
+        content: "Calendário mensal de publicações de todos os clientes.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -48,12 +51,9 @@ function CalendarioGeral() {
     queryFn: () => listConteudos({ data: {} }),
   });
 
-  const nomeCliente = (id: string) =>
-    clientes?.find((c) => c.id === id)?.nome ?? "Cliente";
+  const nomeCliente = (id: string) => clientes?.find((c) => c.id === id)?.nome ?? "Cliente";
 
-  const visiveis = (conteudos ?? []).filter(
-    (c) => filtro === "todos" || c.cliente_id === filtro,
-  );
+  const visiveis = (conteudos ?? []).filter((c) => filtro === "todos" || c.cliente_id === filtro);
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">

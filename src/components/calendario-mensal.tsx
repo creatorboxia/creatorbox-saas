@@ -45,10 +45,20 @@ export function CalendarioMensal({
           {mes.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
         </h2>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" aria-label="Mês anterior" onClick={() => mudarMes(-1)}>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Mês anterior"
+            onClick={() => mudarMes(-1)}
+          >
             <ChevronLeft className="size-4" />
           </Button>
-          <Button variant="outline" size="icon" aria-label="Próximo mês" onClick={() => mudarMes(1)}>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Próximo mês"
+            onClick={() => mudarMes(1)}
+          >
             <ChevronRight className="size-4" />
           </Button>
         </div>
