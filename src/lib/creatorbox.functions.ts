@@ -201,9 +201,15 @@ export const saveConteudo = createServerFn({ method: "POST" })
 
     const payload = { ...rest, data_planejada: rest.data_planejada || null };
     if (id) {
-      return unwrap(
-        await context.supabase.from("conteudos").update(payload).eq("id", id).select("id").single(),
-      );
+      const { data: rows, error } = await context.supabase
+        .from("conteudos")
+        .update(payload)
+        .eq("id", id)
+        .eq("user_id", context.userId)
+        .select("id");
+      if (error) throw new Error(error.message);
+      if (!rows || rows.length === 0) throw new Error("Conteúdo não encontrado.");
+      return rows[0];
     }
     return unwrap(
       await context.supabase
@@ -218,8 +224,15 @@ export const deleteConteudo = createServerFn({ method: "POST" })
   .middleware([requireExternalAuth])
   .inputValidator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("conteudos").delete().eq("id", data.id);
+    // Filtro explícito por dono, além do RLS; confirma que algo foi de fato removido.
+    const { data: rows, error } = await context.supabase
+      .from("conteudos")
+      .delete()
+      .eq("id", data.id)
+      .eq("user_id", context.userId)
+      .select("id");
     if (error) throw new Error(error.message);
+    if (!rows || rows.length === 0) throw new Error("Conteúdo não encontrado.");
     return { ok: true };
   });
 
