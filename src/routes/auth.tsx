@@ -86,17 +86,6 @@ function AuthPage() {
     setAguardandoConfirmacao(true);
   }
 
-  async function comGoogle() {
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/dashboard` },
-    });
-    if (error) {
-      setLoading(false);
-      toast.error("Não foi possível entrar com o Google", { description: error.message });
-    }
-  }
 
   async function recuperarSenha() {
     if (!email) {
@@ -187,15 +176,6 @@ function AuthPage() {
         </TabsContent>
       </Tabs>
 
-      <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
-        <span className="h-px flex-1 bg-border" />
-        ou
-        <span className="h-px flex-1 bg-border" />
-      </div>
-
-      <Button variant="outline" className="w-full" onClick={comGoogle} disabled={loading}>
-        Continuar com Google
-      </Button>
 
       <p className="mt-6 rounded-xl border border-border bg-background/50 p-4 text-center text-sm text-muted-foreground">
         Ainda não tem conta? O acesso é exclusivo para assinantes.{" "}
