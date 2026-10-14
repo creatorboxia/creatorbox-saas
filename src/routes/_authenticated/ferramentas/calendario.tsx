@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { CalendarioMensal } from "@/components/calendario-mensal";
+import { ConteudoDialog } from "@/components/conteudo-dialog";
 import { useClientes, FiltroCliente } from "@/components/filtro-cliente";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { listConteudos, saveConteudo } from "@/lib/creatorbox.functions";
+import { listConteudos, saveConteudo, type Conteudo } from "@/lib/creatorbox.functions";
 
 export const Route = createFileRoute("/_authenticated/ferramentas/calendario")({
   head: () => ({
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/_authenticated/ferramentas/calendario")({
 
 function CalendarioGeral() {
   const [filtro, setFiltro] = useState("todos");
+  const [selecionado, setSelecionado] = useState<Conteudo | null>(null);
 
   const { data: clientes } = useClientes();
   const { data: conteudos } = useQuery({
@@ -70,7 +72,18 @@ function CalendarioGeral() {
         </div>
       </div>
 
-      <CalendarioMensal className="mt-8" conteudos={visiveis} nomeCliente={nomeCliente} />
+      <CalendarioMensal
+        className="mt-8"
+        conteudos={visiveis}
+        nomeCliente={nomeCliente}
+        onSelect={setSelecionado}
+      />
+      <ConteudoDialog
+        open={!!selecionado}
+        onOpenChange={(o) => !o && setSelecionado(null)}
+        conteudo={selecionado}
+        clientes={clientes ?? []}
+      />
     </div>
   );
 }

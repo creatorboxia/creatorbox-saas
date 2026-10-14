@@ -13,10 +13,12 @@ const semana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 export function CalendarioMensal({
   conteudos,
   nomeCliente,
+  onSelect,
   className,
 }: {
   conteudos: Conteudo[];
   nomeCliente?: (clienteId: string) => string;
+  onSelect?: (conteudo: Conteudo) => void;
   className?: string;
 }) {
   const hoje = new Date();
@@ -86,14 +88,16 @@ export function CalendarioMensal({
                 conteudosDoDia(dia).map((conteudo) => {
                   const cliente = nomeCliente?.(conteudo.cliente_id);
                   return (
-                    <p
+                    <button
+                      type="button"
                       key={conteudo.id}
-                      className="truncate rounded bg-primary/20 px-1.5 py-1 text-[11px] text-foreground"
+                      onClick={() => onSelect?.(conteudo)}
+                      className="block w-full truncate rounded bg-primary/20 px-1.5 py-1 text-left text-[11px] text-foreground transition-colors hover:bg-primary/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       title={cliente ? `${conteudo.titulo} — ${cliente}` : conteudo.titulo}
                     >
                       {cliente && <span className="text-muted-foreground">{cliente} · </span>}
                       {conteudo.titulo}
-                    </p>
+                    </button>
                   );
                 })}
             </div>
