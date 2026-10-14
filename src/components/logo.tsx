@@ -12,13 +12,7 @@ const tamanhos = {
 
 export type LogoSize = keyof typeof tamanhos;
 
-export function LogoMark({
-  size = "sm",
-  className = "",
-}: {
-  size?: LogoSize;
-  className?: string;
-}) {
+export function LogoMark({ size = "sm", className = "" }: { size?: LogoSize; className?: string }) {
   return (
     <img
       src="/logo-mark.png"

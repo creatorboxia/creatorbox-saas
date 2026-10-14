@@ -24,7 +24,11 @@ export function ConteudoAnexos({ conteudoId }: { conteudoId: string | null }) {
   const [envio, setEnvio] = useState<{ feito: number; total: number } | null>(null);
 
   const chave = ["anexos", conteudoId];
-  const { data: anexos, isLoading, error } = useQuery({
+  const {
+    data: anexos,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: chave,
     enabled: !!conteudoId,
     queryFn: async () => {
@@ -40,7 +44,8 @@ export function ConteudoAnexos({ conteudoId }: { conteudoId: string | null }) {
       await queryClient.invalidateQueries({ queryKey: chave });
       toast.success("Anexo removido.");
     },
-    onError: (e: Error) => toast.error("Não foi possível remover o anexo", { description: e.message }),
+    onError: (e: Error) =>
+      toast.error("Não foi possível remover o anexo", { description: e.message }),
   });
 
   async function enviar(files: FileList | null) {

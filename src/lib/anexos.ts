@@ -57,7 +57,10 @@ export async function enviarAnexo(conteudoId: string, file: File) {
   const userId = auth.user?.id;
   if (!userId) throw new Error("Sessão expirada. Entre novamente.");
 
-  const seguro = file.name.normalize("NFD").replace(/[^\w.-]+/g, "_").slice(-80);
+  const seguro = file.name
+    .normalize("NFD")
+    .replace(/[^\w.-]+/g, "_")
+    .slice(-80);
   const caminho = `${userId}/${conteudoId}/${crypto.randomUUID()}-${seguro}`;
 
   const up = await externo.storage

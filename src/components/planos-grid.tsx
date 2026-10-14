@@ -33,7 +33,9 @@ export function PlanosGrid() {
             key={p.id}
             className={cn(
               "relative flex flex-col rounded-2xl border bg-card/70 p-7 transition-colors",
-              p.destaque ? "border-primary/60 shadow-glow" : "border-border hover:border-primary/40",
+              p.destaque
+                ? "border-primary/60 shadow-glow"
+                : "border-border hover:border-primary/40",
             )}
           >
             {p.destaque && (
