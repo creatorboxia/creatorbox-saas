@@ -222,14 +222,19 @@ ALTER TABLE public.stripe_processed_events ENABLE ROW LEVEL SECURITY;
 -- ============================================================
 -- anexos dos conteúdos: bucket PRIVADO "conteudo-anexos" + metadados
 -- Caminho dos arquivos: {user_id}/{conteudo_id}/{arquivo}
--- Limite: 50 MB por arquivo (limite padrão do Supabase Free), 10 por conteúdo.
+-- Limite: 50 MB por arquivo, 10 por conteúdo (garantido por trigger com trava).
+-- Arquivos físicos são apagados pelo app antes de excluir conteúdo/cliente;
+-- a cascata do banco remove apenas os metadados.
 -- ============================================================
+BEGIN;
+
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES (
-  'conteudo-anexos', 'conteudo-anexos', false, 52428800,
-  ARRAY['image/jpeg','image/png','image/webp','video/mp4','video/quicktime','application/pdf']
-)
-ON CONFLICT (id) DO NOTHING;
+VALUES ('conteudo-anexos', 'conteudo-anexos', false, 52428800,
+  ARRAY['image/jpeg','image/png','image/webp','video/mp4','video/quicktime','application/pdf'])
+ON CONFLICT (id) DO UPDATE SET
+  public = false,
+  file_size_limit = EXCLUDED.file_size_limit,
+  allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 CREATE TABLE IF NOT EXISTS public.conteudo_anexos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -242,9 +247,32 @@ CREATE TABLE IF NOT EXISTS public.conteudo_anexos (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS conteudo_anexos_conteudo_idx ON public.conteudo_anexos (conteudo_id);
+CREATE INDEX IF NOT EXISTS conteudo_anexos_user_idx ON public.conteudo_anexos (user_id);
+
 GRANT SELECT, INSERT, DELETE ON public.conteudo_anexos TO authenticated;
 GRANT ALL ON public.conteudo_anexos TO service_role;
 ALTER TABLE public.conteudo_anexos ENABLE ROW LEVEL SECURITY;
+
+-- Limite de 10 por conteúdo, seguro com envios simultâneos:
+-- trava a linha do conteúdo, então inserções paralelas entram em fila.
+CREATE OR REPLACE FUNCTION public.conteudo_anexos_limite()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE n INTEGER;
+BEGIN
+  PERFORM 1 FROM public.conteudos WHERE id = NEW.conteudo_id FOR UPDATE;
+  SELECT count(*) INTO n FROM public.conteudo_anexos WHERE conteudo_id = NEW.conteudo_id;
+  IF n >= 10 THEN
+    RAISE EXCEPTION 'Limite de 10 arquivos por conteúdo.' USING ERRCODE = 'check_violation';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.conteudo_anexos_limite() FROM PUBLIC, anon, authenticated;
+
+DROP TRIGGER IF EXISTS conteudo_anexos_limite_trg ON public.conteudo_anexos;
+CREATE TRIGGER conteudo_anexos_limite_trg
+  BEFORE INSERT ON public.conteudo_anexos
+  FOR EACH ROW EXECUTE FUNCTION public.conteudo_anexos_limite();
 
 DROP POLICY IF EXISTS "anexos_select_own" ON public.conteudo_anexos;
 CREATE POLICY "anexos_select_own" ON public.conteudo_anexos
@@ -255,19 +283,20 @@ CREATE POLICY "anexos_insert_own" ON public.conteudo_anexos
   FOR INSERT TO authenticated WITH CHECK (
     auth.uid() = user_id
     AND caminho LIKE auth.uid()::text || '/' || conteudo_id::text || '/%'
-    AND EXISTS (SELECT 1 FROM public.conteudos c WHERE c.id = conteudo_id AND c.user_id = auth.uid())
-    AND (SELECT count(*) FROM public.conteudo_anexos a WHERE a.conteudo_id = conteudo_anexos.conteudo_id) < 10
+    AND EXISTS (SELECT 1 FROM public.conteudos c
+                WHERE c.id = conteudo_id AND c.user_id = auth.uid())
   );
 
 DROP POLICY IF EXISTS "anexos_delete_own" ON public.conteudo_anexos;
 CREATE POLICY "anexos_delete_own" ON public.conteudo_anexos
   FOR DELETE TO authenticated USING (auth.uid() = user_id);
 
--- Storage: só a pasta do próprio usuário, e só em conteúdos dele.
+-- Storage: só a própria pasta e só em conteúdos próprios. Sem UPDATE (não sobrescreve).
 DROP POLICY IF EXISTS "anexos_storage_select_own" ON storage.objects;
 CREATE POLICY "anexos_storage_select_own" ON storage.objects
   FOR SELECT TO authenticated
-  USING (bucket_id = 'conteudo-anexos' AND (storage.foldername(name))[1] = auth.uid()::text);
+  USING (bucket_id = 'conteudo-anexos'
+         AND (storage.foldername(name))[1] = auth.uid()::text);
 
 DROP POLICY IF EXISTS "anexos_storage_insert_own" ON storage.objects;
 CREATE POLICY "anexos_storage_insert_own" ON storage.objects
@@ -275,13 +304,15 @@ CREATE POLICY "anexos_storage_insert_own" ON storage.objects
   WITH CHECK (
     bucket_id = 'conteudo-anexos'
     AND (storage.foldername(name))[1] = auth.uid()::text
-    AND EXISTS (
-      SELECT 1 FROM public.conteudos c
-      WHERE c.id::text = (storage.foldername(name))[2] AND c.user_id = auth.uid()
-    )
+    AND EXISTS (SELECT 1 FROM public.conteudos c
+                WHERE c.id::text = (storage.foldername(name))[2]
+                  AND c.user_id = auth.uid())
   );
 
 DROP POLICY IF EXISTS "anexos_storage_delete_own" ON storage.objects;
 CREATE POLICY "anexos_storage_delete_own" ON storage.objects
   FOR DELETE TO authenticated
-  USING (bucket_id = 'conteudo-anexos' AND (storage.foldername(name))[1] = auth.uid()::text);
+  USING (bucket_id = 'conteudo-anexos'
+         AND (storage.foldername(name))[1] = auth.uid()::text);
+
+COMMIT;
