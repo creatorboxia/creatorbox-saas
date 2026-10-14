@@ -112,7 +112,12 @@ export function ClienteForm({
       className="space-y-6"
     >
       <Secao titulo="Informações básicas" descricao="Quem é a empresa e o que ela vende.">
-        <Campo label="Nome do cliente" required value={values.nome} onChange={(v) => set("nome", v)} />
+        <Campo
+          label="Nome do cliente"
+          required
+          value={values.nome}
+          onChange={(v) => set("nome", v)}
+        />
         <Campo label="Nicho" value={values.nicho} onChange={(v) => set("nicho", v)} />
         <Campo
           label="Instagram"

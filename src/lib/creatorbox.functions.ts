@@ -224,6 +224,21 @@ export const deleteConteudo = createServerFn({ method: "POST" })
   .middleware([requireExternalAuth])
   .inputValidator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
+    // Apaga os arquivos anexados no Storage antes (as linhas de metadados caem em cascata).
+    // Se a tabela de anexos ainda não existir, segue a exclusão normalmente.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
+    const anexos = await sb
+      .from("conteudo_anexos")
+      .select("caminho")
+      .eq("conteudo_id", data.id)
+      .eq("user_id", context.userId);
+    const caminhos = ((anexos.data ?? []) as { caminho: string }[]).map((a) => a.caminho);
+    if (caminhos.length) {
+      const st = await context.supabase.storage.from("conteudo-anexos").remove(caminhos);
+      if (st.error) throw new Error(`Não foi possível apagar os anexos: ${st.error.message}`);
+    }
+
     // Filtro explícito por dono, além do RLS; confirma que algo foi de fato removido.
     const { data: rows, error } = await context.supabase
       .from("conteudos")

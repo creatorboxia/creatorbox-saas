@@ -13,6 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ConteudoAnexos } from "@/components/conteudo-anexos";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -285,6 +286,7 @@ export function ConteudoDialog({
                 <Input id="cd-cta" value={form.cta} onChange={(e) => set("cta", e.target.value)} />
               </div>
             </div>
+            <ConteudoAnexos conteudoId={conteudo?.id ?? null} />
             <div className="flex items-center justify-between gap-2">
               {conteudo ? (
                 <Button
