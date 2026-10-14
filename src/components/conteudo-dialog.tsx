@@ -47,7 +47,11 @@ export const statusLabel: Record<ConteudoForm["status"], string> = {
   publicado: "Publicado",
 };
 
-function paraForm(c: Conteudo | null, clienteId: string, padrao?: Partial<ConteudoForm>): ConteudoForm {
+function paraForm(
+  c: Conteudo | null,
+  clienteId: string,
+  padrao?: Partial<ConteudoForm>,
+): ConteudoForm {
   if (!c)
     return {
       cliente_id: clienteId,
@@ -198,7 +202,10 @@ export function ConteudoDialog({
               </div>
               <div className="space-y-2">
                 <Label>Formato</Label>
-                <Select value={form.tipo} onValueChange={(v) => set("tipo", v as ConteudoForm["tipo"])}>
+                <Select
+                  value={form.tipo}
+                  onValueChange={(v) => set("tipo", v as ConteudoForm["tipo"])}
+                >
                   <SelectTrigger aria-label="Formato">
                     <SelectValue />
                   </SelectTrigger>
@@ -248,15 +255,30 @@ export function ConteudoDialog({
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="cd-ideia">Ideia</Label>
-                <Textarea id="cd-ideia" rows={2} value={form.ideia} onChange={(e) => set("ideia", e.target.value)} />
+                <Textarea
+                  id="cd-ideia"
+                  rows={2}
+                  value={form.ideia}
+                  onChange={(e) => set("ideia", e.target.value)}
+                />
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="cd-roteiro">Roteiro</Label>
-                <Textarea id="cd-roteiro" rows={4} value={form.roteiro} onChange={(e) => set("roteiro", e.target.value)} />
+                <Textarea
+                  id="cd-roteiro"
+                  rows={4}
+                  value={form.roteiro}
+                  onChange={(e) => set("roteiro", e.target.value)}
+                />
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="cd-legenda">Legenda</Label>
-                <Textarea id="cd-legenda" rows={3} value={form.legenda} onChange={(e) => set("legenda", e.target.value)} />
+                <Textarea
+                  id="cd-legenda"
+                  rows={3}
+                  value={form.legenda}
+                  onChange={(e) => set("legenda", e.target.value)}
+                />
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="cd-cta">Chamada para ação</Label>

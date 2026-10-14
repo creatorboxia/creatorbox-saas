@@ -20,7 +20,10 @@ export const Route = createFileRoute("/_authenticated/ferramentas/conteudos")({
       { title: "Conteúdos — CreatorBox" },
       { name: "description", content: "Todos os conteúdos cadastrados, de todos os clientes." },
       { property: "og:title", content: "Conteúdos — CreatorBox" },
-      { property: "og:description", content: "Todos os conteúdos cadastrados, de todos os clientes." },
+      {
+        property: "og:description",
+        content: "Todos os conteúdos cadastrados, de todos os clientes.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

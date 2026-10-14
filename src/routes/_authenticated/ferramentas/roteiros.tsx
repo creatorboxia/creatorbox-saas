@@ -13,7 +13,10 @@ export const Route = createFileRoute("/_authenticated/ferramentas/roteiros")({
       { title: "Roteiros — CreatorBox" },
       { name: "description", content: "Roteiros escritos para os conteúdos de todos os clientes." },
       { property: "og:title", content: "Roteiros — CreatorBox" },
-      { property: "og:description", content: "Roteiros escritos para os conteúdos de todos os clientes." },
+      {
+        property: "og:description",
+        content: "Roteiros escritos para os conteúdos de todos os clientes.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -39,10 +42,7 @@ function Roteiros() {
   const nomeCliente = (id: string) => clientes?.find((c) => c.id === id)?.nome ?? "Cliente";
 
   const roteiros = (conteudos ?? []).filter(
-    (c) =>
-      c.roteiro &&
-      c.roteiro.trim() !== "" &&
-      (filtro === "todos" || c.cliente_id === filtro),
+    (c) => c.roteiro && c.roteiro.trim() !== "" && (filtro === "todos" || c.cliente_id === filtro),
   );
 
   return (
@@ -79,7 +79,9 @@ function Roteiros() {
                   <span className="text-xs text-muted-foreground">
                     {nomeCliente(conteudo.cliente_id)}
                   </span>
-                  <Badge variant="secondary">{statusLabel[conteudo.status] ?? conteudo.status}</Badge>
+                  <Badge variant="secondary">
+                    {statusLabel[conteudo.status] ?? conteudo.status}
+                  </Badge>
                 </div>
               </div>
               <p className="mt-3 text-sm whitespace-pre-wrap text-muted-foreground">
