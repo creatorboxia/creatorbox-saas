@@ -82,8 +82,7 @@ function Conta() {
       queryClient.invalidateQueries({ queryKey: ["perfil"] });
       toast.success("Perfil atualizado");
     },
-    onError: (erro: Error) =>
-      toast.error("Não foi possível salvar", { description: erro.message }),
+    onError: (erro: Error) => toast.error("Não foi possível salvar", { description: erro.message }),
   });
 
   async function enviarFoto(arquivo: File) {
