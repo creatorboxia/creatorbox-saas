@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,72 @@ function ResetPassword() {
   const navigate = useNavigate();
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
+  const [estado, setEstado] = useState<"verificando" | "ok" | "invalido">("verificando");
+
+  useEffect(() => {
+    let ativo = true;
+    async function preparar() {
+      const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const query = new URLSearchParams(window.location.search);
+      try {
+        if (hash.get("error") || query.get("error")) throw new Error("link");
+        const access_token = hash.get("access_token");
+        const refresh_token = hash.get("refresh_token");
+        const tokenHash = query.get("token_hash");
+        const code = query.get("code");
+        if (access_token && refresh_token) {
+          const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+          if (error) throw error;
+        } else if (tokenHash) {
+          const type = (query.get("type") ?? "recovery") as "recovery" | "invite" | "magiclink";
+          const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+          if (error) throw error;
+        } else if (code) {
+          const { data } = await supabase.auth.getSession();
+          if (!data.session) {
+            const { error } = await supabase.auth.exchangeCodeForSession(code);
+            if (error) throw error;
+          }
+        }
+        let { data } = await supabase.auth.getSession();
+        for (let i = 0; !data.session && i < 8; i += 1) {
+          await new Promise((r) => setTimeout(r, 250));
+          ({ data } = await supabase.auth.getSession());
+        }
+        if (!data.session) throw new Error("sem sessão");
+        window.history.replaceState(null, "", window.location.pathname);
+        if (ativo) setEstado("ok");
+      } catch {
+        if (ativo) setEstado("invalido");
+      }
+    }
+    void preparar();
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  if (estado !== "ok") {
+    return (
+      <main className="flex min-h-screen items-center justify-center surface-grid px-4">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-card/80 p-8 text-center shadow-glow">
+          {estado === "verificando" ? (
+            <p className="text-sm text-muted-foreground">Validando seu link...</p>
+          ) : (
+            <>
+              <h1 className="text-2xl font-semibold">Link inválido ou expirado</h1>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Volte para a tela de login e use "Esqueci minha senha" para receber um novo link.
+              </p>
+              <Button className="mt-6 w-full" onClick={() => navigate({ to: "/auth" })}>
+                Ir para o login
+              </Button>
+            </>
+          )}
+        </div>
+      </main>
+    );
+  }
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
