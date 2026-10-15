@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import {
   CalendarDays,
+  ChevronDown,
   FileText,
   Home,
   Lightbulb,
@@ -107,6 +108,8 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
     queryKey: ["clientes"],
     queryFn: () => listClientes(),
   });
+  const [listaAberta, setListaAberta] = useState(true);
+  const [menuClienteAberto, setMenuClienteAberto] = useState(true);
 
   async function sair() {
     await queryClient.cancelQueries();
@@ -150,9 +153,18 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
       </nav>
 
       <div className="mt-7 flex items-center justify-between px-5">
-        <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        <button
+          type="button"
+          onClick={() => setListaAberta((v) => !v)}
+          aria-expanded={listaAberta}
+          aria-label={listaAberta ? "Recolher lista de clientes" : "Expandir lista de clientes"}
+          className="-ml-1 flex items-center gap-1 rounded-md px-1 py-0.5 text-xs font-medium tracking-wide text-muted-foreground uppercase transition-colors hover:text-foreground"
+        >
+          <ChevronDown
+            className={`size-3.5 transition-transform ${listaAberta ? "" : "-rotate-90"}`}
+          />
           Clientes
-        </span>
+        </button>
         <Link
           to="/clientes/novo"
           onClick={onNavigate}
@@ -164,69 +176,92 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
       </div>
 
       <ScrollArea className="mt-2 flex-1 px-3">
-        <div className="space-y-1 pb-4">
-          {(clientes ?? []).map((cliente) => {
-            const ativo = params.clienteId === cliente.id;
-            return (
-              <div key={cliente.id}>
-                <Link
-                  to="/clientes/$clienteId"
-                  params={{ clienteId: cliente.id }}
-                  onClick={onNavigate}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
-                    ativo
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
-                  }`}
-                >
-                  <Users className="size-4 shrink-0" />
-                  <span className="truncate">{cliente.nome}</span>
-                </Link>
-
-                {ativo && (
-                  <div className="mt-1 ml-6 space-y-0.5 border-l border-sidebar-border pl-3">
-                    <SubItem
+        {listaAberta && (
+          <div className="space-y-1 pb-4">
+            {(clientes ?? []).map((cliente) => {
+              const ativo = params.clienteId === cliente.id;
+              return (
+                <div key={cliente.id}>
+                  <div
+                    className={`flex items-center rounded-lg transition-colors ${
+                      ativo
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                        : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
+                    }`}
+                  >
+                    <Link
                       to="/clientes/$clienteId"
-                      id={cliente.id}
-                      label="Visão geral"
-                      onNavigate={onNavigate}
-                    />
-                    <SubItem
-                      to="/clientes/$clienteId/estrategia"
-                      id={cliente.id}
-                      label="Estratégia"
-                      onNavigate={onNavigate}
-                    />
-                    <SubItem
-                      to="/clientes/$clienteId/calendario"
-                      id={cliente.id}
-                      label="Calendário"
-                      onNavigate={onNavigate}
-                    />
-                    <SubItem
-                      to="/clientes/$clienteId/conteudos"
-                      id={cliente.id}
-                      label="Conteúdos"
-                      onNavigate={onNavigate}
-                    />
-                    <SubItem
-                      to="/clientes/$clienteId/informacoes"
-                      id={cliente.id}
-                      label="Informações do cliente"
-                      onNavigate={onNavigate}
-                    />
+                      params={{ clienteId: cliente.id }}
+                      onClick={onNavigate}
+                      className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-sm"
+                    >
+                      <Users className="size-4 shrink-0" />
+                      <span className="truncate">{cliente.nome}</span>
+                    </Link>
+                    {ativo && (
+                      <button
+                        type="button"
+                        onClick={() => setMenuClienteAberto((v) => !v)}
+                        aria-expanded={menuClienteAberto}
+                        aria-label={
+                          menuClienteAberto
+                            ? "Recolher navegação do cliente"
+                            : "Expandir navegação do cliente"
+                        }
+                        className="mr-1 rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        <ChevronDown
+                          className={`size-4 transition-transform ${menuClienteAberto ? "" : "-rotate-90"}`}
+                        />
+                      </button>
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
 
-          {clientes?.length === 0 && (
-            <p className="px-3 py-2 text-xs text-muted-foreground">
-              Nenhum cliente ainda. Use o + para adicionar o primeiro.
-            </p>
-          )}
-        </div>
+                  {ativo && menuClienteAberto && (
+                    <div className="mt-1 ml-6 space-y-0.5 border-l border-sidebar-border pl-3">
+                      <SubItem
+                        to="/clientes/$clienteId"
+                        id={cliente.id}
+                        label="Visão geral"
+                        onNavigate={onNavigate}
+                      />
+                      <SubItem
+                        to="/clientes/$clienteId/estrategia"
+                        id={cliente.id}
+                        label="Estratégia"
+                        onNavigate={onNavigate}
+                      />
+                      <SubItem
+                        to="/clientes/$clienteId/calendario"
+                        id={cliente.id}
+                        label="Calendário"
+                        onNavigate={onNavigate}
+                      />
+                      <SubItem
+                        to="/clientes/$clienteId/conteudos"
+                        id={cliente.id}
+                        label="Conteúdos"
+                        onNavigate={onNavigate}
+                      />
+                      <SubItem
+                        to="/clientes/$clienteId/informacoes"
+                        id={cliente.id}
+                        label="Informações do cliente"
+                        onNavigate={onNavigate}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {clientes?.length === 0 && (
+              <p className="px-3 py-2 text-xs text-muted-foreground">
+                Nenhum cliente ainda. Use o + para adicionar o primeiro.
+              </p>
+            )}
+          </div>
+        )}
       </ScrollArea>
 
       <div className="space-y-1 border-t border-sidebar-border p-3">
