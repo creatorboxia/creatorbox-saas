@@ -9,7 +9,6 @@ import {
 } from "@tanstack/react-router";
 import {
   CalendarDays,
-  Clapperboard,
   FileText,
   Home,
   Lightbulb,
@@ -143,12 +142,6 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
         />
         <NavItem to="/ferramentas/ideias" icon={Lightbulb} label="Ideias" onNavigate={onNavigate} />
         <NavItem
-          to="/ferramentas/roteiros"
-          icon={Clapperboard}
-          label="Roteiros"
-          onNavigate={onNavigate}
-        />
-        <NavItem
           to="/ferramentas/conteudos"
           icon={FileText}
           label="Conteúdos"
@@ -259,7 +252,6 @@ function NavItem({
     | "/conta"
     | "/ferramentas/calendario"
     | "/ferramentas/ideias"
-    | "/ferramentas/roteiros"
     | "/ferramentas/conteudos";
   icon: typeof CalendarDays;
   label: string;
