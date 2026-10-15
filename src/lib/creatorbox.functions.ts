@@ -9,7 +9,12 @@ import { podeSeguirExclusao } from "@/lib/anexos-erros";
 type SupabaseClientType = SupabaseClient<Database>;
 
 export type Cliente = Database["public"]["Tables"]["clientes"]["Row"];
-export type Conteudo = Database["public"]["Tables"]["conteudos"]["Row"];
+export type Prioridade = "baixa" | "media" | "alta";
+// Colunas adicionadas pela migration de prioridade/favoritos (supabase-setup.sql).
+export type Conteudo = Database["public"]["Tables"]["conteudos"]["Row"] & {
+  prioridade?: Prioridade | null;
+  favorito?: boolean;
+};
 
 const texto = () => z.string().nullable().default(null);
 
@@ -45,6 +50,8 @@ const conteudoSchema = z.object({
   cta: texto(),
   status: z.enum(["ideia", "planejado", "produzido", "publicado"]),
   data_planejada: texto(),
+  // Opcional: quando ausente, a edição não toca na prioridade gravada.
+  prioridade: z.enum(["baixa", "media", "alta"]).nullable().optional(),
 });
 export type ConteudoInput = z.input<typeof conteudoSchema>;
 
@@ -256,7 +263,12 @@ export const saveConteudo = createServerFn({ method: "POST" })
     // tanto na criação quanto na edição.
     await assertClienteOwnership(context.supabase, rest.cliente_id, context.userId);
 
-    const payload = { ...rest, data_planejada: rest.data_planejada || null };
+    const { prioridade, ...campos } = rest;
+    const payload = {
+      ...campos,
+      data_planejada: campos.data_planejada || null,
+      ...(prioridade !== undefined ? { prioridade } : {}),
+    } as typeof campos;
     if (id) {
       const { data: rows, error } = await context.supabase
         .from("conteudos")
@@ -275,6 +287,25 @@ export const saveConteudo = createServerFn({ method: "POST" })
         .select("id")
         .single(),
     );
+  });
+
+export const setFavoritoConteudo = createServerFn({ method: "POST" })
+  .middleware([requireExternalAuth])
+  .inputValidator((data: { id: string; favorito: boolean }) =>
+    z.object({ id: z.string().uuid(), favorito: z.boolean() }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
+    const { data: rows, error } = await sb
+      .from("conteudos")
+      .update({ favorito: data.favorito })
+      .eq("id", data.id)
+      .eq("user_id", context.userId)
+      .select("id, favorito");
+    if (error) throw new Error(error.message);
+    if (!rows || rows.length === 0) throw new Error("Conteúdo não encontrado.");
+    return rows[0] as { id: string; favorito: boolean };
   });
 
 export const deleteConteudo = createServerFn({ method: "POST" })

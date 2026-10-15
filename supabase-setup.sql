@@ -347,3 +347,31 @@ CREATE POLICY "anexos_storage_delete_own" ON storage.objects
          AND (storage.foldername(name))[1] = auth.uid()::text);
 
 COMMIT;
+
+-- =============================================================================
+-- Prioridade e favoritos em conteúdos (aba Ideias) — aditivo, preserva dados.
+-- As policies conteudos_*_own (auth.uid() = user_id) já cobrem as linhas inteiras,
+-- incluindo estas colunas. Reexecutável.
+-- =============================================================================
+BEGIN;
+
+ALTER TABLE public.conteudos ADD COLUMN IF NOT EXISTS prioridade TEXT;
+ALTER TABLE public.conteudos ADD COLUMN IF NOT EXISTS favorito BOOLEAN NOT NULL DEFAULT false;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'conteudos_prioridade_check'
+      AND conrelid = 'public.conteudos'::regclass
+  ) THEN
+    ALTER TABLE public.conteudos
+      ADD CONSTRAINT conteudos_prioridade_check
+      CHECK (prioridade IS NULL OR prioridade IN ('baixa', 'media', 'alta'));
+  END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS conteudos_user_favorito_idx
+  ON public.conteudos (user_id) WHERE favorito;
+
+COMMIT;

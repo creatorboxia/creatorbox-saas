@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Lightbulb, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { Lightbulb, Pencil, Star, Plus, Search, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { ConteudoDialog } from "@/components/conteudo-dialog";
+import { ConteudoDialog, prioridadeLabel } from "@/components/conteudo-dialog";
 import { useClientes, FiltroCliente } from "@/components/filtro-cliente";
 import {
   AlertDialog,
@@ -26,7 +26,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { deleteConteudo, listConteudos, type Conteudo } from "@/lib/creatorbox.functions";
+import {
+  deleteConteudo,
+  listConteudos,
+  setFavoritoConteudo,
+  type Conteudo,
+  type Prioridade,
+} from "@/lib/creatorbox.functions";
 
 export const Route = createFileRoute("/_authenticated/ferramentas/ideias")({
   head: () => ({
@@ -49,6 +55,12 @@ const tipoLabel: Record<string, string> = {
   post: "Post",
 };
 
+const prioridadeVariant: Record<Prioridade, "default" | "secondary" | "outline"> = {
+  alta: "default",
+  media: "secondary",
+  baixa: "outline",
+};
+
 const normalizar = (t: string) =>
   t
     .normalize("NFD")
@@ -62,6 +74,8 @@ function Ideias() {
   const [formato, setFormato] = useState("todos");
   const [categoria, setCategoria] = useState("todas");
   const [busca, setBusca] = useState("");
+  const [prioridade, setPrioridade] = useState("todas");
+  const [soFavoritos, setSoFavoritos] = useState(false);
   const [aberto, setAberto] = useState(false);
   const [editando, setEditando] = useState<Conteudo | null>(null);
   const [excluir, setExcluir] = useState<Conteudo | null>(null);
@@ -94,6 +108,24 @@ function Ideias() {
     },
   });
 
+  const favoritar = useMutation({
+    mutationFn: (v: { id: string; favorito: boolean }) => setFavoritoConteudo({ data: v }),
+    onMutate: async (v) => {
+      const chave = ["conteudos", "geral"];
+      await queryClient.cancelQueries({ queryKey: chave });
+      const anterior = queryClient.getQueryData<Conteudo[]>(chave);
+      queryClient.setQueryData<Conteudo[]>(chave, (lista) =>
+        lista?.map((c) => (c.id === v.id ? { ...c, favorito: v.favorito } : c)),
+      );
+      return { anterior };
+    },
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.anterior) queryClient.setQueryData(["conteudos", "geral"], ctx.anterior);
+      toast.error("Não foi possível atualizar o favorito", { description: e.message });
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["conteudos"] }),
+  });
+
   const nomeCliente = (id: string) => clientes?.find((c) => c.id === id)?.nome ?? "Cliente";
 
   const todasIdeias = useMemo(
@@ -115,17 +147,27 @@ function Ideias() {
       (filtro === "todos" || c.cliente_id === filtro) &&
       (formato === "todos" || c.tipo === formato) &&
       (categoria === "todas" || c.categoria?.trim() === categoria) &&
+      (prioridade === "todas" ||
+        (prioridade === "nenhuma" ? !c.prioridade : c.prioridade === prioridade)) &&
+      (!soFavoritos || c.favorito === true) &&
       (!termo || normalizar(`${c.titulo} ${c.ideia ?? ""}`).includes(termo)),
   );
 
   const filtrosAtivos =
-    filtro !== "todos" || formato !== "todos" || categoria !== "todas" || busca !== "";
+    filtro !== "todos" ||
+    formato !== "todos" ||
+    categoria !== "todas" ||
+    prioridade !== "todas" ||
+    soFavoritos ||
+    busca !== "";
 
   const limpar = () => {
     setFiltro("todos");
     setFormato("todos");
     setCategoria("todas");
     setBusca("");
+    setPrioridade("todas");
+    setSoFavoritos(false);
   };
 
   const novaIdeia = () => {
@@ -158,6 +200,7 @@ function Ideias() {
         }}
         conteudo={editando}
         clientes={clientes ?? []}
+        comPrioridade
         padrao={{ status: "ideia", cliente_id: filtro !== "todos" ? filtro : "" }}
       />
 
@@ -200,6 +243,29 @@ function Ideias() {
               ))}
             </SelectContent>
           </Select>
+          <Select value={prioridade} onValueChange={setPrioridade}>
+            <SelectTrigger className="w-44" aria-label="Filtrar por prioridade">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas as prioridades</SelectItem>
+              {Object.entries(prioridadeLabel).map(([v, l]) => (
+                <SelectItem key={v} value={v}>
+                  {l}
+                </SelectItem>
+              ))}
+              <SelectItem value="nenhuma">Sem prioridade</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            variant={soFavoritos ? "secondary" : "outline"}
+            size="sm"
+            aria-pressed={soFavoritos}
+            onClick={() => setSoFavoritos((v) => !v)}
+          >
+            <Star className={soFavoritos ? "size-4 fill-primary text-primary" : "size-4"} />
+            Favoritas
+          </Button>
           {filtrosAtivos && (
             <Button variant="ghost" size="sm" onClick={limpar}>
               <X className="size-4" />
@@ -212,7 +278,10 @@ function Ideias() {
       {isLoading ? (
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-32 animate-pulse rounded-2xl border border-border bg-card/40" />
+            <div
+              key={i}
+              className="h-32 animate-pulse rounded-2xl border border-border bg-card/40"
+            />
           ))}
         </div>
       ) : isError ? (
@@ -244,7 +313,9 @@ function Ideias() {
         </div>
       ) : ideias.length === 0 ? (
         <div className="mt-10 rounded-2xl border border-dashed border-border p-10 text-center">
-          <p className="text-sm text-muted-foreground">Nenhuma ideia encontrada com esses filtros.</p>
+          <p className="text-sm text-muted-foreground">
+            Nenhuma ideia encontrada com esses filtros.
+          </p>
           <Button variant="outline" size="sm" className="mt-4" onClick={limpar}>
             Limpar filtros
           </Button>
@@ -257,10 +328,32 @@ function Ideias() {
               className="group flex flex-col rounded-2xl border border-border bg-card/40 p-5 transition-colors hover:border-primary/50"
             >
               <div className="flex items-center justify-between gap-2">
-                <Badge variant="secondary">{tipoLabel[ideia.tipo] ?? ideia.tipo}</Badge>
-                <span className="truncate text-xs text-muted-foreground">
-                  {nomeCliente(ideia.cliente_id)}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <Badge variant="secondary">{tipoLabel[ideia.tipo] ?? ideia.tipo}</Badge>
+                  {ideia.prioridade && (
+                    <Badge variant={prioridadeVariant[ideia.prioridade]}>
+                      {prioridadeLabel[ideia.prioridade]}
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex min-w-0 items-center gap-1">
+                  <span className="truncate text-xs text-muted-foreground">
+                    {nomeCliente(ideia.cliente_id)}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7"
+                    aria-label={ideia.favorito ? "Desfavoritar ideia" : "Favoritar ideia"}
+                    aria-pressed={!!ideia.favorito}
+                    disabled={favoritar.isPending && favoritar.variables?.id === ideia.id}
+                    onClick={() => favoritar.mutate({ id: ideia.id, favorito: !ideia.favorito })}
+                  >
+                    <Star
+                      className={ideia.favorito ? "size-4 fill-primary text-primary" : "size-4"}
+                    />
+                  </Button>
+                </div>
               </div>
               <p className="mt-3 font-medium">{ideia.titulo}</p>
               {ideia.ideia && (
