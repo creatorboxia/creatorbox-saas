@@ -278,7 +278,10 @@ function Ideias() {
       {isLoading ? (
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-32 animate-pulse rounded-2xl border border-border bg-card/40" />
+            <div
+              key={i}
+              className="h-32 animate-pulse rounded-2xl border border-border bg-card/40"
+            />
           ))}
         </div>
       ) : isError ? (
@@ -310,7 +313,9 @@ function Ideias() {
         </div>
       ) : ideias.length === 0 ? (
         <div className="mt-10 rounded-2xl border border-dashed border-border p-10 text-center">
-          <p className="text-sm text-muted-foreground">Nenhuma ideia encontrada com esses filtros.</p>
+          <p className="text-sm text-muted-foreground">
+            Nenhuma ideia encontrada com esses filtros.
+          </p>
           <Button variant="outline" size="sm" className="mt-4" onClick={limpar}>
             Limpar filtros
           </Button>

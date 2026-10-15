@@ -26,7 +26,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { deleteConteudo, saveConteudo, type Conteudo, type Prioridade } from "@/lib/creatorbox.functions";
+import {
+  deleteConteudo,
+  saveConteudo,
+  type Conteudo,
+  type Prioridade,
+} from "@/lib/creatorbox.functions";
 
 export type ConteudoForm = {
   cliente_id: string;
