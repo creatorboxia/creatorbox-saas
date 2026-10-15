@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { deleteConteudo, saveConteudo, type Conteudo } from "@/lib/creatorbox.functions";
+import { deleteConteudo, saveConteudo, type Conteudo, type Prioridade } from "@/lib/creatorbox.functions";
 
 export type ConteudoForm = {
   cliente_id: string;
@@ -39,6 +39,13 @@ export type ConteudoForm = {
   legenda: string;
   cta: string;
   data_planejada: string;
+  prioridade: "" | Prioridade;
+};
+
+export const prioridadeLabel: Record<Prioridade, string> = {
+  baixa: "Baixa",
+  media: "Média",
+  alta: "Alta",
 };
 
 export const statusLabel: Record<ConteudoForm["status"], string> = {
@@ -65,6 +72,7 @@ function paraForm(
       legenda: "",
       cta: "",
       data_planejada: "",
+      prioridade: "",
       ...padrao,
     };
   return {
@@ -78,6 +86,7 @@ function paraForm(
     legenda: c.legenda ?? "",
     cta: c.cta ?? "",
     data_planejada: c.data_planejada ?? "",
+    prioridade: c.prioridade ?? "",
   };
 }
 
@@ -92,6 +101,7 @@ export function ConteudoDialog({
   clienteFixo,
   clientes,
   padrao,
+  comPrioridade = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -99,6 +109,8 @@ export function ConteudoDialog({
   clienteFixo?: string;
   clientes?: { id: string; nome: string }[];
   padrao?: Partial<ConteudoForm>;
+  /** Mostra e grava o campo de prioridade (usado na aba Ideias). Fora dela, a prioridade é preservada. */
+  comPrioridade?: boolean;
 }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<ConteudoForm>(() =>
@@ -132,6 +144,7 @@ export function ConteudoDialog({
           legenda: form.legenda || null,
           cta: form.cta || null,
           data_planejada: form.data_planejada || null,
+          ...(comPrioridade ? { prioridade: form.prioridade || null } : {}),
         },
       }),
     onSuccess: async () => {
@@ -253,6 +266,29 @@ export function ConteudoDialog({
                   onChange={(e) => set("categoria", e.target.value)}
                 />
               </div>
+              {comPrioridade && (
+                <div className="space-y-2">
+                  <Label>Prioridade</Label>
+                  <Select
+                    value={form.prioridade || "nenhuma"}
+                    onValueChange={(v) =>
+                      set("prioridade", v === "nenhuma" ? "" : (v as Prioridade))
+                    }
+                  >
+                    <SelectTrigger aria-label="Prioridade">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="nenhuma">Sem prioridade</SelectItem>
+                      {Object.entries(prioridadeLabel).map(([v, l]) => (
+                        <SelectItem key={v} value={v}>
+                          {l}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="cd-data">Data planejada</Label>
                 <Input
