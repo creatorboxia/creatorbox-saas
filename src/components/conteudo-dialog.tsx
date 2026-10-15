@@ -171,6 +171,14 @@ export function ConteudoDialog({
             className="space-y-4"
             onSubmit={(e) => {
               e.preventDefault();
+              if (!(clienteFixo ?? form.cliente_id)) {
+                toast.error("Escolha o cliente.");
+                return;
+              }
+              if (!form.titulo.trim()) {
+                toast.error("Informe o título.");
+                return;
+              }
               salvar.mutate();
             }}
           >
